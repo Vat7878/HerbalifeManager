@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Herbalife Distributor Pricing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         :root{--primary-green:#8BC34A;--dark-green:#689F38;--light-green:#DCEDC8;--bg-light:#F5F5F5;--bg-dark:#1a1a1a;--card-light:#fff;--card-dark:#2d2d2d;--text-light:#212121;--text-dark:#f5f5f5;--border-light:#e0e0e0;--border-dark:#444}
@@ -40,8 +41,10 @@
         body.dark-mode .product-dropdown{background:var(--card-dark);border-color:var(--border-dark)}
         .product-dropdown.active{display:block}
         .product-category{padding:10px 12px;background:var(--primary-green);color:#fff;font-weight:600;font-size:12px}
-        .product-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-light);font-size:12px}
+        .product-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-light);font-size:12px;display:flex;justify-content:space-between;align-items:center}
         .product-item:hover{background:var(--light-green);color:var(--dark-green)}
+        .product-item-price{font-size:11px;color:#888;font-weight:600;margin-left:8px;white-space:nowrap}
+        .product-item:hover .product-item-price{color:var(--dark-green)}
         .btn-delete{background:#f44336;color:#fff;padding:6px 12px;border:none;border-radius:5px;cursor:pointer;font-size:12px}
         .btn-add{background:var(--primary-green);color:#fff;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;font-size:13px;font-weight:600;margin-top:10px}
         .btn-save{background:#2196F3;color:#fff;padding:12px 30px;border:none;border-radius:5px;cursor:pointer;font-size:15px;font-weight:600;margin-top:12px;width:100%}
@@ -90,6 +93,9 @@
         .loss-value{color:#d32f2f;font-weight:600}
         .success-message{position:fixed;top:20px;right:20px;background:var(--primary-green);color:#fff;padding:15px 25px;border-radius:5px;z-index:1000}
         .watermark{position:fixed;bottom:10px;right:10px;background:rgba(139,195,74,0.1);padding:5px 12px;border-radius:15px;font-size:11px;color:var(--dark-green);z-index:999}
+        /* MRP auto-filled indicator */
+        .member-price.auto-filled{border-color:var(--primary-green)!important;background:rgba(139,195,74,0.08)!important;}
+        .mrp-badge{display:inline-block;font-size:10px;background:var(--light-green);color:var(--dark-green);padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:600;vertical-align:middle;}
     </style>
 </head>
 <body>
@@ -126,7 +132,15 @@
             </div>
             <div class="table-container">
                 <table id="productTable">
-                    <thead><tr><th style="width:220px">Product Name</th><th style="width:110px">Member Price</th><th style="width:90px">Markup %</th><th style="width:90px">Discount %</th><th style="width:80px">Qty</th><th style="width:110px">Final Price</th><th style="width:70px">Action</th></tr></thead>
+                    <thead><tr>
+                        <th style="width:220px">Product Name</th>
+                        <th style="width:110px">MRP (₹) <span style="font-weight:400;font-size:11px">(auto-filled)</span></th>
+                        <th style="width:90px">Markup %</th>
+                        <th style="width:90px">Discount %</th>
+                        <th style="width:80px">Qty</th>
+                        <th style="width:110px">Final Price</th>
+                        <th style="width:70px">Action</th>
+                    </tr></thead>
                     <tbody id="tableBody"></tbody>
                 </table>
                 <button class="btn-add" onclick="addRow()">➕ Add New Row</button>
@@ -168,7 +182,462 @@
     <div class="watermark">Made by Vedant Suryawanshi</div>
 
     <script>
-        const productCategories={WEIGHT_MANAGEMENT:['Formula 1 - Nutritional Shake Mix - Vanilla - 500 gms','Formula 1 - Nutritional Shake Mix - Chocolate - 500 gms','Formula 1 - Nutritional Shake Mix - Mango - 500 gms','Formula 1 - Nutritional Shake Mix - Orange Cream - 500 gms','Formula 1 - Nutritional Shake Mix - Strawberry - 500 gms','Formula 1 - Nutritional Shake Mix - Kulfi - 500 gms','Formula 1 - Nutritional Shake Mix - Banana Caramel - 500 gms','Formula 1 - Nutritional Shake Mix - Rose Kheer - 500 gms','Formula 1 Nutritional shake mix - Faan - 500 gms','Formula 1 Mango - 750 gms','Formula 1 Vanilla - 750 gms','Formula 1 Kulfi - 750 gms','Formula 1 Rose Kheer - 750 gms','Personalized Protein Powder - 200 gms','Personalized Protein Powder - 400 gms','ShakeMate - 500 gms'],EYE_HEALTH:['Ocular Defense','Liftoff Watermelon (30 Packets)'],MENS_HEALTH:['Male Factor +'],WOMENS_HEALTH:["Woman's Choice"],BRAIN_HEALTH:['vritilife Brain Health - 60 tablets'],SKIN_CARE:['vritilife Facial Cleanser (100 ml)','vritilife Facial Toner (100 ml)','vritilife Moisturizer (100 ml)','vritilife Facial Serum (30 ml)','HN - Skin Booster Canister','HN - Skin Booster - Orange - 10gms * 30 Sachets'],IMMUNITY:['vritilife Immune Health - 60 tablets'],ENERGY:['Afresh Energy Drink Mix - Ginger - 50 gms','Afresh Energy Drink Mix - Elaichi - 50 gms','Afresh Energy Drink Mix - Lemon - 50 gms','Afresh Energy Drink Mix - Peach - 50 gms','Afresh Energy Drink Mix - Cinnamon - 50 gms','Afresh Energy Drink Mix - Kashmiri Kahwa - 40 gms','Afresh Energy Drink Mix - Tulsi (Basil) - 50 gms'],SPORTS:['H24 Hydrate - 5gms * 20 Sachets','H24 Rebuild Strength - 50gms * 10 Sachets'],CHILDREN:['DinoShake - Chocolicious - 200 gms','Dinoshake Nutritional Children\'s Drink Mix - Strawberry - 200 gms'],DIGESTIVE:['Activated Fiber - 90 tablets','Active Fiber Complex - Unflavoured - 200 gms','Aloe Plus - 60 capsules','Herbal Aloe Concentrate - Unflavored (Original) - 500 ml','Simply Probiotic - 1gms * 30 Sachets','Vritilife Triphala'],BONE:['Herbalife Calcium Tablets - 60 tablets','Joint Support - 90 tablets'],CARDIO:['Herbalife Niteworks - 300 gms','Herbalifeline - 60 softgels','Beta Heart - Vanilla Flavour - 15 gms * 15 Sachets'],ENHANCERS:['Multivitamin Mineral & Herbal - 90 tablets','Sleep Enhance'],SLEEP:['Cell Activator - New - 60 Tablets','Cell-U-Loss Advanced - 90 Tablets','Herbal Control - 90 Tablets']};let storage={distributorName:'',bills:[],darkMode:false,markupValues:{},discountValues:{}};function init(){loadFromLocalStorage();loadDistributorName();loadDarkMode();loadBills();for(let i=0;i<5;i++)addRow();}function loadFromLocalStorage(){const s=localStorage.getItem('herbalifeStorage');if(s)try{storage=JSON.parse(s)}catch(e){}}function saveToLocalStorage(){localStorage.setItem('herbalifeStorage',JSON.stringify(storage));}function loadDistributorName(){const s=storage.distributorName;if(s){document.getElementById('distributorName').value=s;document.getElementById('currentDistributor').innerHTML=`Current Distributor: <strong>${s}</strong>`;}}document.addEventListener('DOMContentLoaded',function(){const d=document.getElementById('distributorName');if(d){d.addEventListener('change',function(){storage.distributorName=this.value.trim();saveToLocalStorage();document.getElementById('currentDistributor').innerHTML=`Current Distributor: <strong>${storage.distributorName}</strong>`;showSuccess('Distributor name updated!');});}});function toggleDarkMode(){document.getElementById('darkModeToggle').classList.toggle('active');document.body.classList.toggle('dark-mode');storage.darkMode=document.body.classList.contains('dark-mode');saveToLocalStorage();}function loadDarkMode(){if(storage.darkMode){document.body.classList.add('dark-mode');document.getElementById('darkModeToggle').classList.add('active');}}function addRow(){const t=document.getElementById('tableBody');const r=t.insertRow();const i=t.rows.length-1;r.innerHTML=`<td><div class="product-input-wrapper"><input type="text" class="product-name" placeholder="Click arrow or type" data-row="${i}"><button class="product-dropdown-btn" onclick="toggleProductDropdown(event,${i})">▼</button><div class="product-dropdown" id="dropdown-${i}"></div></div></td><td><input type="number" class="member-price" placeholder="0.00" step="0.01" oninput="calculate(this)"></td><td><input type="number" class="markup" placeholder="0" step="0.01" value="0" oninput="onMarkupChange(this)"></td><td><input type="number" class="discount" placeholder="0" step="0.01" value="0" oninput="onDiscountChange(this)"></td><td><input type="number" class="quantity" placeholder="1" step="1" value="1" min="1" oninput="calculate(this)"></td><td><input type="number" class="final-price" readonly></td><td><button class="btn-delete" onclick="deleteRow(this)">🗑️</button></td>`;const m=r.querySelector('.markup');const d=r.querySelector('.discount');if(storage.markupValues[i])m.value=storage.markupValues[i];if(storage.discountValues[i])d.value=storage.discountValues[i];const drop=document.getElementById(`dropdown-${i}`);let html='';for(const[cat,prods]of Object.entries(productCategories)){html+=`<div class="product-category">${cat}</div>`;prods.forEach(p=>{html+=`<div class="product-item" onclick="selectProduct('${p.replace(/'/g,"\\'")}',${i})">${p}</div>`;});}drop.innerHTML=html;}function toggleProductDropdown(e,i){e.preventDefault();const d=document.getElementById(`dropdown-${i}`);d.classList.toggle('active');document.querySelectorAll('.product-dropdown').forEach(x=>{if(x.id!==`dropdown-${i}`)x.classList.remove('active');});}function selectProduct(p,i){document.querySelector(`input[data-row="${i}"]`).value=p;document.getElementById(`dropdown-${i}`).classList.remove('active');showSuccess(`Product selected`);}document.addEventListener('input',function(e){if(e.target.classList.contains('product-name')){const i=e.target.getAttribute('data-row');const d=document.getElementById(`dropdown-${i}`);const q=e.target.value.toLowerCase();if(q.length>0){let h=false;d.querySelectorAll('.product-item').forEach(item=>{if(item.textContent.toLowerCase().includes(q)){item.style.display='block';h=true;}else item.style.display='none';});if(h)d.classList.add('active');}else d.classList.remove('active');}});function calculate(input){const r=input.closest('tr');const mp=parseFloat(r.querySelector('.member-price').value)||0;const mk=parseFloat(r.querySelector('.markup').value)||0;const dc=parseFloat(r.querySelector('.discount').value)||0;const qty=parseInt(r.querySelector('.quantity').value)||1;const sp=mp+(mp*mk/100);const fp=sp-(sp*dc/100);r.querySelector('.final-price').value=(fp*qty).toFixed(2);}function onMarkupChange(input){const v=parseFloat(input.value)||0;const i=Array.from(document.querySelectorAll('.markup')).indexOf(input);storage.markupValues[i]=v.toString();saveToLocalStorage();calculate(input);}function onDiscountChange(input){const v=parseFloat(input.value)||0;const i=Array.from(document.querySelectorAll('.discount')).indexOf(input);storage.discountValues[i]=v.toString();saveToLocalStorage();calculate(input);}function deleteRow(btn){if(confirm('Delete row?'))btn.closest('tr').remove();}function saveBill(){const bn=document.getElementById('billName').value.trim();const dn=document.getElementById('distributorName').value.trim();if(!bn){alert('Enter bill name');return;}if(!dn){alert('Enter distributor name');return;}storage.distributorName=dn;saveToLocalStorage();const rows=document.querySelectorAll('#tableBody tr');const prods=[];rows.forEach(r=>{const pn=r.querySelector('.product-name').value.trim();if(pn){const mp=parseFloat(r.querySelector('.member-price').value)||0;const mk=parseFloat(r.querySelector('.markup').value)||0;const dc=parseFloat(r.querySelector('.discount').value)||0;const qty=parseInt(r.querySelector('.quantity').value)||1;const fp=parseFloat(r.querySelector('.final-price').value)||0;const sp=mp+(mp*mk/100);const fsp=sp-(sp*dc/100);const prf=fsp-mp;prods.push({name:pn,memberPrice:mp,markup:mk,discount:dc,quantity:qty,finalPrice:fp,profit:prf*qty,profitPercent:mp>0?(prf/mp*100):0,sellingPrice:sp});}});if(prods.length===0){alert('Add products');return;}const bill={id:Date.now(),name:bn,distributor:storage.distributorName,products:prods,savedDate:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}),timestamp:Date.now()};storage.bills.push(bill);saveToLocalStorage();showSuccess(`Bill saved!`);document.getElementById('billName').value='';document.getElementById('tableBody').innerHTML='';storage.markupValues={};storage.discountValues={};saveToLocalStorage();for(let i=0;i<5;i++)addRow();loadBills();updateSummary();}function loadBills(){const bills=storage.bills||[];const c=document.getElementById('billsContainer');if(bills.length===0){c.innerHTML='<div class="empty-state"><h2>No bills yet</h2></div>';return;}c.innerHTML=bills.map(b=>{const tr=b.products.reduce((s,p)=>s+p.finalPrice,0);const tp=b.products.reduce((s,p)=>s+p.profit,0);return`<div class="bill-card" data-name="${b.name.toLowerCase()}"><div class="bill-header"><div><h3 style="margin:0;color:var(--dark-green)">${b.name}</h3><div class="bill-date">📅 ${b.savedDate}</div></div><div class="bill-actions"><button class="btn-view" onclick="viewBill(${b.id})">👁️ View</button><button class="btn-download" onclick="downloadBill(${b.id})">📥 Download</button><button class="btn-delete-bill" onclick="deleteBill(${b.id})">🗑️ Delete</button></div></div><div class="bill-items">${b.products.map(p=>`<div class="bill-item"><div class="bill-item-name">${p.name}</div><div style="display:flex;gap:20px"><span>Qty: ${p.quantity}</span><span>₹${p.finalPrice.toFixed(2)}</span></div></div>`).join('')}</div><div class="bill-summary"><div class="bill-summary-row"><span>Items:</span><span>${b.products.length}</span></div><div class="bill-summary-row"><span>Revenue:</span><span>₹${tr.toFixed(2)}</span></div><div class="bill-summary-row"><span>Profit:</span><span>${tp>=0?'₹'+tp.toFixed(2):'<span class="loss-value">Loss: ₹'+Math.abs(tp).toFixed(2)+'</span>'}</span></div></div></div>`;}).join('');}function downloadBill(id){const b=storage.bills.find(x=>x.id===id);if(!b)return;const csv=['Bill: '+b.name,'Date: '+b.savedDate,'Distributor: '+(b.distributor||'N/A'),'','Product,Qty,Price,Markup,Discount,Final',b.products.map(p=>`${p.name},${p.quantity},${p.memberPrice.toFixed(2)},${p.markup.toFixed(2)},${p.discount.toFixed(2)},${p.finalPrice.toFixed(2)}`).join('\n'),'','Total Items: '+b.products.length,'Total Revenue: ₹'+b.products.reduce((s,p)=>s+p.finalPrice,0).toFixed(2),'Total Profit: ₹'+b.products.reduce((s,p)=>s+p.profit,0).toFixed(2)].join('\n');const blob=new Blob([csv],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${b.name.replace(/\s+/g,'_')}_${Date.now()}.txt`;a.click();URL.revokeObjectURL(url);showSuccess('Downloaded!');}function viewBill(id){const b=storage.bills.find(x=>x.id===id);if(!b)return;document.getElementById('modalBillTitle').textContent=`${b.name} - ${b.savedDate}`;document.getElementById('modalBillItems').innerHTML=b.products.map(p=>{const l=p.profit<0;return`<div class="modal-bill-item"><h4>${p.name}</h4><div class="item-detail"><span>Price:</span><strong>₹${p.memberPrice.toFixed(2)}</strong></div><div class="item-detail"><span>Markup:</span><strong>${p.markup.toFixed(2)}%</strong></div><div class="item-detail"><span>Discount:</span><strong>${p.discount.toFixed(2)}%</strong></div><div class="item-detail"><span>Qty:</span><strong>${p.quantity}</strong></div><div class="item-detail"><span>Final:</span><strong style="color:#8BC34A">₹${p.finalPrice.toFixed(2)}</strong></div><div class="item-detail"><span>Profit:</span><strong style="color:${l?'#d32f2f':'#689F38'}">${l?'Loss':'Profit'}: ₹${Math.abs(p.profit).toFixed(2)}</strong></div></div>`;}).join('');document.getElementById('viewBillModal').classList.add('active');}function closeModal(){document.getElementById('viewBillModal').classList.remove('active');}function searchBills(){const q=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('.bill-card').forEach(c=>{c.style.display=c.getAttribute('data-name').includes(q)?'block':'none';});}function deleteBill(id){if(confirm('Delete bill?')){storage.bills=storage.bills.filter(b=>b.id!==id);saveToLocalStorage();loadBills();updateSummary();showSuccess('Deleted!');}}function updateSummary(){const bills=storage.bills||[];const all=bills.flatMap(b=>b.products);document.getElementById('totalBills').textContent=bills.length;document.getElementById('totalProducts').textContent=all.length;const tr=all.reduce((s,p)=>s+p.finalPrice,0);const tp=all.reduce((s,p)=>s+p.profit,0);document.getElementById('totalRevenue').textContent=`₹${tr.toFixed(2)}`;document.getElementById('totalProfit').textContent=tp>=0?`₹${tp.toFixed(2)}`:`Loss: ₹${Math.abs(tp).toFixed(2)}`;}function exportCSV(){const bills=storage.bills||[];if(!bills.length){alert('No bills');return;}let csv='Bill,Date,Product,Price,Markup,Discount,Qty,Final,Profit\n';bills.forEach(b=>{b.products.forEach(p=>{csv+=`"${b.name}","${b.savedDate}","${p.name}",${p.memberPrice},${p.markup},${p.discount},${p.quantity},${p.finalPrice},${p.profit}\n`;});});const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`bills_${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(url);}function printSummary(){window.print();}function showPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));if(p==='input'){document.getElementById('inputPage').classList.add('active');document.querySelectorAll('.nav-btn')[0].classList.add('active');}else if(p==='saved'){document.getElementById('savedPage').classList.add('active');document.querySelectorAll('.nav-btn')[1].classList.add('active');loadBills();}else{document.getElementById('summaryPage').classList.add('active');document.querySelectorAll('.nav-btn')[2].classList.add('active');updateSummary();}}function showSuccess(m){const msg=document.createElement('div');msg.className='success-message';msg.textContent=m;document.body.appendChild(msg);setTimeout(()=>msg.remove(),3000);}init();
+    // ─── MRP PRICE MAP (from Associates Price List, effective 01-Nov-2025) ───────
+    // Key: product name (lowercase, trimmed) → MRP value
+    const mrpPriceMap = {
+      // WEIGHT MANAGEMENT
+      'formula 1- nutritional shake mix - vanilla- 500 gms': 2179,
+      'formula 1 - nutritional shake mix - vanilla - 500 gms': 2179,
+      'formula 1 - nutritional shake mix - vanilla- 500 gms': 2179,
+      'formula 1- nutritional shake mix - chocolate-500 gms': 2179,
+      'formula 1 - nutritional shake mix - chocolate-500 gms': 2179,
+      'formula 1 - nutritional shake mix - chocolate - 500 gms': 2179,
+      'formula 1- nutritional shake mix - mango-500 gms': 2179,
+      'formula 1 - nutritional shake mix - mango-500 gms': 2179,
+      'formula 1 - nutritional shake mix - mango - 500 gms': 2179,
+      'formula 1- nutritional shake mix - orange cream -500 gms': 2179,
+      'formula 1 - nutritional shake mix - orange cream -500 gms': 2179,
+      'formula 1 - nutritional shake mix - orange cream - 500 gms': 2179,
+      'formula 1- nutritional shake mix - strawberry- 500 gms': 2179,
+      'formula 1 - nutritional shake mix - strawberry- 500 gms': 2179,
+      'formula 1 - nutritional shake mix - strawberry - 500 gms': 2179,
+      'formula 1- nutritional shake mix - kulfi- 500 gms': 2179,
+      'formula 1 - nutritional shake mix - kulfi - 500 gms': 2179,
+      'formula 1 - nutritional shake mix - kulfi- 500 gms': 2179,
+      'formula 1- nutritional shake mix - banana caramel -500 gms': 2179,
+      'formula 1 - nutritional shake mix - banana caramel -500 gms': 2179,
+      'formula 1 - nutritional shake mix - banana caramel - 500 gms': 2179,
+      'formula 1- nutritional shake mix - rose kheer -500 gms': 2179,
+      'formula 1 - nutritional shake mix - rose kheer -500 gms': 2179,
+      'formula 1 - nutritional shake mix - rose kheer - 500 gms': 2179,
+      'formula 1 nutritional shake mix - faan - 500 gms': 2179,
+      'formula 1 nutritional shake mix – paan -500 gms': 2179,
+      'formula 1 mango -750 gms': 3227,
+      'formula 1 mango - 750 gms': 3227,
+      'formula 1 vanilla -750 gms': 3227,
+      'formula 1 vanilla - 750 gms': 3227,
+      'formula 1 kulfi -750 gms': 3227,
+      'formula 1 kulfi - 750 gms': 3227,
+      'formula 1 rose kheer -750 gms': 3227,
+      'formula 1 rose kheer - 750 gms': 3227,
+      'personalized protein powder - 200 gms': 1295,
+      'personalized protein powder - 400 gms': 2485,
+      'shakemate - 500 gms': 653,
+      'shakemate -500 gms': 653,
+      // EYE HEALTH
+      'liftoff watermelon (30 packets)': 4119,
+      'ocular defense': 1927,
+      // MEN'S HEALTH
+      'male factor +': 3410,
+      // WOMEN'S HEALTH
+      "woman's choice": 1245,
+      'womans choice': 1245,
+      // BRAIN HEALTH
+      'vritilife brain health - 60 tablets': 1464,
+      // SKIN & BODY CARE
+      'vritilife® facial cleanser (100 ml)': 1165,
+      'vritilife facial cleanser (100 ml)': 1165,
+      'vritilife® facial toner (100 ml)': 1322,
+      'vritilife facial toner (100 ml)': 1322,
+      'vritilife® facial serum (30 ml)': 3022,
+      'vritilife facial serum (30 ml)': 3022,
+      'vritilife® moisturizer (100 ml)': 1473,
+      'vritilife moisturizer (100 ml)': 1473,
+      'hn-skin booster - orange - 10gms * 30 sachets': 3910,
+      'hn – skin booster - orange - 10gms * 30 sachets': 3910,
+      'hn - skin booster - orange - 10gms * 30 sachets': 3910,
+      'hn – skin booster canister': 3910,
+      'hn - skin booster canister': 3910,
+      // IMMUNITY
+      'vritilife immune health - 60 tablets': 1528,
+      // ENERGY
+      'afresh energy drink mix - ginger - 50 gms': 812,
+      'afresh energy drink mix- ginger - 50 gms': 812,
+      'afresh energy drink mix - elaichi - 50 gms': 812,
+      'afresh energy drink mix - elaichi-50 gms': 812,
+      'afresh energy drink mix - lemon - 50 gms': 812,
+      'afresh energy drink mix - peach - 50 gms': 812,
+      'afresh energy drink mix - cinnamon - 50 gms': 812,
+      'afresh energy drink mix -kashmiri kahwa - 40 gms': 812,
+      'afresh energy drink mix - kashmiri kahwa - 40 gms': 812,
+      'afresh energy drink mix - tulsi (basil) - 50 gms': 812,
+      // SPORTS
+      'h24 hydrate - 5gms * 20 sachets': 1636,
+      'h24 rebuild strength - 50gms * 10 sachets': 2616,
+      // CHILDREN
+      'dinoshake - chocolicious - 200 gms': 1115,
+      'dinashaketm - chocolicious - 200 gms': 1115,
+      'dinoshake nutritional children\'s drink mix - strawberry - 200 gms': 1115,
+      'dinoshake nutritional children\'s drink mix - strawberry -200 gms': 1115,
+      // DIGESTIVE
+      'activated fiber - 90 tablets': 1636,
+      'active fiber complex - unflavoured - 200 gms': 2559,
+      'active fiber complex -unflavoured - 200 gms': 2559,
+      'aloe plus - 60 capsules': 1059,
+      'herbal aloe concentrate - unflavored (original) - 500 ml': 2696,
+      'simply probiotic - 1gms * 30 sachets': 2209,
+      'vritilife triphala': 1089,
+      // BONE & JOINT
+      'herbalife calcium tablets - 60 tablets': 1203,
+      'joint support - 90 tablets': 2455,
+      // CARDIOVASCULAR
+      'herbalife niteworks - 300 gms': 7128,
+      'herbalifeline - 60 softgels': 2667,
+      'beta heart - vanilla flavour - 15 gms * 15 sachets': 2242,
+      'beta heart - vanilla flavour -15 gms * 15 sachets': 2242,
+      // ENHANCERS
+      'multivitamin mineral & herbal - 90 tablets': 2004,
+      'multivitamin mineral & herbal -90 tablets': 2004,
+      // SLEEP SUPPORT
+      'cell activator - new - 60 tablets': 2215,
+      'cell-u-loss advanced - 90 tablets': 1705,
+      'herbal control - 90 tablets': 3433,
+      'sleep enhance': 1697,
+    };
+
+    // Helper: look up MRP by product name (fuzzy-tolerant lowercase match)
+    function getMRP(productName) {
+      if (!productName) return null;
+      const key = productName.trim().toLowerCase();
+      // Direct match
+      if (mrpPriceMap[key] !== undefined) return mrpPriceMap[key];
+      // Fuzzy: try partial match
+      for (const [k, v] of Object.entries(mrpPriceMap)) {
+        if (k === key) return v;
+      }
+      // Try removing special chars for comparison
+      const normalize = s => s.replace(/[®™–—\-]/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
+      const nKey = normalize(productName);
+      for (const [k, v] of Object.entries(mrpPriceMap)) {
+        if (normalize(k) === nKey) return v;
+      }
+      return null;
+    }
+
+    const productCategories={
+      WEIGHT_MANAGEMENT:['Formula 1 - Nutritional Shake Mix - Vanilla - 500 gms','Formula 1 - Nutritional Shake Mix - Chocolate - 500 gms','Formula 1 - Nutritional Shake Mix - Mango - 500 gms','Formula 1 - Nutritional Shake Mix - Orange Cream - 500 gms','Formula 1 - Nutritional Shake Mix - Strawberry - 500 gms','Formula 1 - Nutritional Shake Mix - Kulfi - 500 gms','Formula 1 - Nutritional Shake Mix - Banana Caramel - 500 gms','Formula 1 - Nutritional Shake Mix - Rose Kheer - 500 gms','Formula 1 Nutritional shake mix - Faan - 500 gms','Formula 1 Mango - 750 gms','Formula 1 Vanilla - 750 gms','Formula 1 Kulfi - 750 gms','Formula 1 Rose Kheer - 750 gms','Personalized Protein Powder - 200 gms','Personalized Protein Powder - 400 gms','ShakeMate - 500 gms'],
+      EYE_HEALTH:['Ocular Defense','Liftoff Watermelon (30 Packets)'],
+      MENS_HEALTH:['Male Factor +'],
+      WOMENS_HEALTH:["Woman's Choice"],
+      BRAIN_HEALTH:['vritilife Brain Health - 60 tablets'],
+      SKIN_CARE:['vritilife Facial Cleanser (100 ml)','vritilife Facial Toner (100 ml)','vritilife Moisturizer (100 ml)','vritilife Facial Serum (30 ml)','HN - Skin Booster Canister','HN - Skin Booster - Orange - 10gms * 30 Sachets'],
+      IMMUNITY:['vritilife Immune Health - 60 tablets'],
+      ENERGY:['Afresh Energy Drink Mix - Ginger - 50 gms','Afresh Energy Drink Mix - Elaichi - 50 gms','Afresh Energy Drink Mix - Lemon - 50 gms','Afresh Energy Drink Mix - Peach - 50 gms','Afresh Energy Drink Mix - Cinnamon - 50 gms','Afresh Energy Drink Mix - Kashmiri Kahwa - 40 gms','Afresh Energy Drink Mix - Tulsi (Basil) - 50 gms'],
+      SPORTS:['H24 Hydrate - 5gms * 20 Sachets','H24 Rebuild Strength - 50gms * 10 Sachets'],
+      CHILDREN:['DinoShake - Chocolicious - 200 gms','Dinoshake Nutritional Children\'s Drink Mix - Strawberry - 200 gms'],
+      DIGESTIVE:['Activated Fiber - 90 tablets','Active Fiber Complex - Unflavoured - 200 gms','Aloe Plus - 60 capsules','Herbal Aloe Concentrate - Unflavored (Original) - 500 ml','Simply Probiotic - 1gms * 30 Sachets','Vritilife Triphala'],
+      BONE:['Herbalife Calcium Tablets - 60 tablets','Joint Support - 90 tablets'],
+      CARDIO:['Herbalife Niteworks - 300 gms','Herbalifeline - 60 softgels','Beta Heart - Vanilla Flavour - 15 gms * 15 Sachets'],
+      ENHANCERS:['Multivitamin Mineral & Herbal - 90 tablets','Sleep Enhance'],
+      SLEEP:['Cell Activator - New - 60 Tablets','Cell-U-Loss Advanced - 90 Tablets','Herbal Control - 90 Tablets']
+    };
+
+    let storage={distributorName:'',bills:[],darkMode:false,markupValues:{},discountValues:{}};
+
+    function init(){loadFromLocalStorage();loadDistributorName();loadDarkMode();loadBills();for(let i=0;i<5;i++)addRow();}
+    function loadFromLocalStorage(){const s=localStorage.getItem('herbalifeStorage');if(s)try{storage=JSON.parse(s)}catch(e){}}
+    function saveToLocalStorage(){localStorage.setItem('herbalifeStorage',JSON.stringify(storage));}
+    function loadDistributorName(){const s=storage.distributorName;if(s){document.getElementById('distributorName').value=s;document.getElementById('currentDistributor').innerHTML=`Current Distributor: <strong>${s}</strong>`;}}
+
+    document.addEventListener('DOMContentLoaded',function(){
+      const d=document.getElementById('distributorName');
+      if(d){d.addEventListener('change',function(){storage.distributorName=this.value.trim();saveToLocalStorage();document.getElementById('currentDistributor').innerHTML=`Current Distributor: <strong>${storage.distributorName}</strong>`;showSuccess('Distributor name updated!');});}
+    });
+
+    function toggleDarkMode(){document.getElementById('darkModeToggle').classList.toggle('active');document.body.classList.toggle('dark-mode');storage.darkMode=document.body.classList.contains('dark-mode');saveToLocalStorage();}
+    function loadDarkMode(){if(storage.darkMode){document.body.classList.add('dark-mode');document.getElementById('darkModeToggle').classList.add('active');}}
+
+    function addRow(){
+      const t=document.getElementById('tableBody');
+      const r=t.insertRow();
+      const i=t.rows.length-1;
+      r.innerHTML=`<td><div class="product-input-wrapper"><input type="text" class="product-name" placeholder="Click arrow or type" data-row="${i}"><button class="product-dropdown-btn" onclick="toggleProductDropdown(event,${i})">▼</button><div class="product-dropdown" id="dropdown-${i}"></div></div></td><td><input type="number" class="member-price" placeholder="Auto-fills on select" step="0.01" oninput="onMemberPriceInput(this)"></td><td><input type="number" class="markup" placeholder="0" step="0.01" value="0" oninput="onMarkupChange(this)"></td><td><input type="number" class="discount" placeholder="0" step="0.01" value="0" oninput="onDiscountChange(this)"></td><td><input type="number" class="quantity" placeholder="1" step="1" value="1" min="1" oninput="calculate(this)"></td><td><input type="number" class="final-price" readonly></td><td><button class="btn-delete" onclick="deleteRow(this)">🗑️</button></td>`;
+      const m=r.querySelector('.markup');
+      const d=r.querySelector('.discount');
+      if(storage.markupValues[i])m.value=storage.markupValues[i];
+      if(storage.discountValues[i])d.value=storage.discountValues[i];
+      // Build dropdown with MRP shown
+      const drop=document.getElementById(`dropdown-${i}`);
+      let html='';
+      for(const[cat,prods]of Object.entries(productCategories)){
+        html+=`<div class="product-category">${cat}</div>`;
+        prods.forEach(p=>{
+          const mrp=getMRP(p);
+          const priceTag=mrp?`<span class="product-item-price">MRP ₹${mrp}</span>`:'';
+          html+=`<div class="product-item" onclick="selectProduct('${p.replace(/'/g,"\\'")}',${i})"><span>${p}</span>${priceTag}</div>`;
+        });
+      }
+      drop.innerHTML=html;
+    }
+
+    function toggleProductDropdown(e,i){e.preventDefault();const d=document.getElementById(`dropdown-${i}`);d.classList.toggle('active');document.querySelectorAll('.product-dropdown').forEach(x=>{if(x.id!==`dropdown-${i}`)x.classList.remove('active');});}
+
+    // ─── KEY CHANGE: auto-fill MRP when product selected ────────────────────────
+    function selectProduct(p,i){
+      const nameInput=document.querySelector(`input[data-row="${i}"]`);
+      nameInput.value=p;
+      document.getElementById(`dropdown-${i}`).classList.remove('active');
+      // Find member-price input in same row
+      const row=nameInput.closest('tr');
+      const priceInput=row.querySelector('.member-price');
+      const mrp=getMRP(p);
+      if(mrp!==null){
+        priceInput.value=mrp.toFixed(2);
+        priceInput.classList.add('auto-filled');
+        calculate(priceInput);
+        showSuccess(`✅ ${p} — MRP ₹${mrp} loaded`);
+      } else {
+        priceInput.classList.remove('auto-filled');
+        showSuccess(`Product selected — enter MRP manually`);
+      }
+    }
+
+    function onMemberPriceInput(input){
+      // Manual override: remove auto-filled style when user types
+      input.classList.remove('auto-filled');
+      calculate(input);
+    }
+
+    document.addEventListener('input',function(e){
+      if(e.target.classList.contains('product-name')){
+        const i=e.target.getAttribute('data-row');
+        const d=document.getElementById(`dropdown-${i}`);
+        const q=e.target.value.toLowerCase();
+        if(q.length>0){
+          let h=false;
+          d.querySelectorAll('.product-item').forEach(item=>{
+            const name=item.querySelector('span')?item.querySelector('span').textContent:item.textContent;
+            if(name.toLowerCase().includes(q)){item.style.display='flex';h=true;}
+            else item.style.display='none';
+          });
+          d.querySelectorAll('.product-category').forEach(cat=>{
+            // Hide category if all children hidden
+            let next=cat.nextElementSibling;
+            let anyVisible=false;
+            while(next&&!next.classList.contains('product-category')){
+              if(next.style.display!=='none')anyVisible=true;
+              next=next.nextElementSibling;
+            }
+            cat.style.display=anyVisible?'block':'none';
+          });
+          if(h)d.classList.add('active');
+        } else {
+          d.querySelectorAll('.product-item,.product-category').forEach(x=>x.style.display='');
+          d.classList.remove('active');
+        }
+      }
+    });
+
+    function calculate(input){
+      const r=input.closest('tr');
+      const mp=parseFloat(r.querySelector('.member-price').value)||0;
+      const mk=parseFloat(r.querySelector('.markup').value)||0;
+      const dc=parseFloat(r.querySelector('.discount').value)||0;
+      const qty=parseInt(r.querySelector('.quantity').value)||1;
+      const sp=mp+(mp*mk/100);
+      const fp=sp-(sp*dc/100);
+      r.querySelector('.final-price').value=(fp*qty).toFixed(2);
+    }
+
+    function onMarkupChange(input){const v=parseFloat(input.value)||0;const i=Array.from(document.querySelectorAll('.markup')).indexOf(input);storage.markupValues[i]=v.toString();saveToLocalStorage();calculate(input);}
+    function onDiscountChange(input){const v=parseFloat(input.value)||0;const i=Array.from(document.querySelectorAll('.discount')).indexOf(input);storage.discountValues[i]=v.toString();saveToLocalStorage();calculate(input);}
+    function deleteRow(btn){if(confirm('Delete row?'))btn.closest('tr').remove();}
+
+    function saveBill(){
+      const bn=document.getElementById('billName').value.trim();
+      const dn=document.getElementById('distributorName').value.trim();
+      if(!bn){alert('Enter bill name');return;}
+      if(!dn){alert('Enter distributor name');return;}
+      storage.distributorName=dn;saveToLocalStorage();
+      const rows=document.querySelectorAll('#tableBody tr');
+      const prods=[];
+      rows.forEach(r=>{
+        const pn=r.querySelector('.product-name').value.trim();
+        if(pn){
+          const mp=parseFloat(r.querySelector('.member-price').value)||0;
+          const mk=parseFloat(r.querySelector('.markup').value)||0;
+          const dc=parseFloat(r.querySelector('.discount').value)||0;
+          const qty=parseInt(r.querySelector('.quantity').value)||1;
+          const fp=parseFloat(r.querySelector('.final-price').value)||0;
+          const sp=mp+(mp*mk/100);const fsp=sp-(sp*dc/100);const prf=fsp-mp;
+          prods.push({name:pn,memberPrice:mp,markup:mk,discount:dc,quantity:qty,finalPrice:fp,profit:prf*qty,profitPercent:mp>0?(prf/mp*100):0,sellingPrice:sp});
+        }
+      });
+      if(prods.length===0){alert('Add products');return;}
+      const bill={id:Date.now(),name:bn,distributor:storage.distributorName,products:prods,savedDate:new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}),timestamp:Date.now()};
+      storage.bills.push(bill);saveToLocalStorage();showSuccess(`Bill saved!`);
+      document.getElementById('billName').value='';document.getElementById('tableBody').innerHTML='';
+      storage.markupValues={};storage.discountValues={};saveToLocalStorage();
+      for(let i=0;i<5;i++)addRow();loadBills();updateSummary();
+    }
+
+    function loadBills(){
+      const bills=storage.bills||[];
+      const c=document.getElementById('billsContainer');
+      if(bills.length===0){c.innerHTML='<div class="empty-state"><h2>No bills yet</h2></div>';return;}
+      c.innerHTML=bills.map(b=>{
+        const tr=b.products.reduce((s,p)=>s+p.finalPrice,0);
+        const tp=b.products.reduce((s,p)=>s+p.profit,0);
+        return`<div class="bill-card" data-name="${b.name.toLowerCase()}"><div class="bill-header"><div><h3 style="margin:0;color:var(--dark-green)">${b.name}</h3><div class="bill-date">📅 ${b.savedDate}</div></div><div class="bill-actions"><button class="btn-view" onclick="viewBill(${b.id})">👁️ View</button><button class="btn-download" onclick="downloadBill(${b.id})">📥 Download</button><button class="btn-delete-bill" onclick="deleteBill(${b.id})">🗑️ Delete</button></div></div><div class="bill-items">${b.products.map(p=>`<div class="bill-item"><div class="bill-item-name">${p.name}</div><div style="display:flex;gap:20px"><span>Qty: ${p.quantity}</span><span>₹${p.finalPrice.toFixed(2)}</span></div></div>`).join('')}</div><div class="bill-summary"><div class="bill-summary-row"><span>Items:</span><span>${b.products.length}</span></div><div class="bill-summary-row"><span>Revenue:</span><span>₹${tr.toFixed(2)}</span></div><div class="bill-summary-row"><span>Profit:</span><span>${tp>=0?'₹'+tp.toFixed(2):'<span class="loss-value">Loss: ₹'+Math.abs(tp).toFixed(2)+'</span>'}</span></div></div></div>`;
+      }).join('');
+    }
+
+    function downloadBill(id){
+      const b=storage.bills.find(x=>x.id===id);
+      if(!b)return;
+      const {jsPDF}=window.jspdf;
+      const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+      const pageW=doc.internal.pageSize.getWidth();
+      const pageH=doc.internal.pageSize.getHeight();
+      const margin=15;
+      const colW=pageW-margin*2;
+      let y=margin;
+
+      // ── Header bar ──────────────────────────────────────────────
+      doc.setFillColor(139,195,74);
+      doc.rect(0,0,pageW,28,'F');
+      doc.setTextColor(255,255,255);
+      doc.setFontSize(18);doc.setFont('helvetica','bold');
+      doc.text('🌿 Herbalife Bill',margin,11);
+      doc.setFontSize(10);doc.setFont('helvetica','normal');
+      doc.text('Powered by Herbalife Distributor Pricing App',margin,18);
+      doc.text('Made by Vedant Suryawanshi',pageW-margin,18,{align:'right'});
+      y=35;
+
+      // ── Bill meta ────────────────────────────────────────────────
+      doc.setTextColor(30,30,30);
+      doc.setFontSize(16);doc.setFont('helvetica','bold');
+      doc.text(b.name,margin,y);y+=7;
+      doc.setFontSize(10);doc.setFont('helvetica','normal');
+      doc.setTextColor(100,100,100);
+      doc.text(`Date: ${b.savedDate}`,margin,y);
+      doc.text(`Distributor: ${b.distributor||'N/A'}`,pageW-margin,y,{align:'right'});
+      y+=5;
+
+      // ── Divider ──────────────────────────────────────────────────
+      doc.setDrawColor(139,195,74);doc.setLineWidth(0.5);
+      doc.line(margin,y,pageW-margin,y);y+=6;
+
+      // ── Table header ─────────────────────────────────────────────
+      const cols=[
+        {label:'#',       w:8},
+        {label:'Product Name', w:72},
+        {label:'MRP (₹)', w:22},
+        {label:'Markup%', w:20},
+        {label:'Disc%',   w:16},
+        {label:'Qty',     w:12},
+        {label:'Final (₹)',w:26},
+      ];
+      // header bg
+      doc.setFillColor(104,159,56);
+      doc.rect(margin,y,colW,8,'F');
+      doc.setTextColor(255,255,255);
+      doc.setFontSize(9);doc.setFont('helvetica','bold');
+      let cx=margin+2;
+      cols.forEach(c=>{doc.text(c.label,cx,y+5.5);cx+=c.w;});
+      y+=8;
+
+      // ── Table rows ───────────────────────────────────────────────
+      doc.setFont('helvetica','normal');
+      b.products.forEach((p,idx)=>{
+        const rowH=10;
+        // check page overflow
+        if(y+rowH>pageH-25){
+          doc.addPage();
+          y=margin;
+          // re-draw header on new page
+          doc.setFillColor(104,159,56);
+          doc.rect(margin,y,colW,8,'F');
+          doc.setTextColor(255,255,255);
+          doc.setFontSize(9);doc.setFont('helvetica','bold');
+          let hx=margin+2;
+          cols.forEach(c=>{doc.text(c.label,hx,y+5.5);hx+=c.w;});
+          y+=8;
+          doc.setFont('helvetica','normal');
+        }
+        // alternating row bg
+        if(idx%2===0){doc.setFillColor(240,248,230);doc.rect(margin,y,colW,rowH,'F');}
+        doc.setTextColor(30,30,30);doc.setFontSize(8.5);
+        // truncate product name to fit
+        const maxNameW=cols[1].w-2;
+        let name=p.name;
+        while(doc.getTextWidth(name)>maxNameW&&name.length>5)name=name.slice(0,-1);
+        if(name!==p.name)name=name.slice(0,-1)+'…';
+        const rowData=[
+          String(idx+1),
+          name,
+          p.memberPrice.toFixed(2),
+          p.markup.toFixed(2)+'%',
+          p.discount.toFixed(2)+'%',
+          String(p.quantity),
+          p.finalPrice.toFixed(2),
+        ];
+        cx=margin+2;
+        rowData.forEach((val,vi)=>{
+          doc.text(val,cx,y+6.5);
+          cx+=cols[vi].w;
+        });
+        // subtle row border
+        doc.setDrawColor(220,220,220);doc.setLineWidth(0.2);
+        doc.line(margin,y+rowH,margin+colW,y+rowH);
+        y+=rowH;
+      });
+
+      // ── Summary footer ───────────────────────────────────────────
+      y+=4;
+      doc.setDrawColor(139,195,74);doc.setLineWidth(0.6);
+      doc.line(margin,y,pageW-margin,y);y+=6;
+
+      const totalRev=b.products.reduce((s,p)=>s+p.finalPrice,0);
+      const totalProfit=b.products.reduce((s,p)=>s+p.profit,0);
+      const summaryX=pageW-margin-70;
+
+      doc.setFontSize(10);doc.setFont('helvetica','bold');
+      doc.setTextColor(50,50,50);
+      doc.text(`Total Items:`,summaryX,y);
+      doc.setFont('helvetica','normal');
+      doc.text(`${b.products.length}`,pageW-margin,y,{align:'right'});y+=7;
+
+      doc.setFont('helvetica','bold');
+      doc.text(`Total Revenue:`,summaryX,y);
+      doc.setFont('helvetica','normal');
+      doc.text(`Rs.${totalRev.toFixed(2)}`,pageW-margin,y,{align:'right'});y+=7;
+
+      doc.setFont('helvetica','bold');
+      const isLoss=totalProfit<0;
+      doc.setTextColor(isLoss?211:69,isLoss?47:160,isLoss?47:56);
+      doc.text(isLoss?'Total Loss:':'Total Profit:',summaryX,y);
+      doc.setFont('helvetica','normal');
+      doc.text(`Rs.${Math.abs(totalProfit).toFixed(2)}`,pageW-margin,y,{align:'right'});y+=10;
+
+      // ── Page footer ──────────────────────────────────────────────
+      doc.setFontSize(8);doc.setTextColor(160,160,160);doc.setFont('helvetica','italic');
+      doc.text(`Generated on ${new Date().toLocaleString()}`,margin,pageH-8);
+      doc.text('Made by Vedant Suryawanshi',pageW-margin,pageH-8,{align:'right'});
+
+      // ── Save with bill name ──────────────────────────────────────
+      const filename=`${b.name.replace(/[^a-zA-Z0-9_\- ]/g,'').trim().replace(/\s+/g,'_')}.pdf`;
+      doc.save(filename);
+      showSuccess(`📄 "${b.name}.pdf" downloaded!`);
+    }
+
+    function viewBill(id){const b=storage.bills.find(x=>x.id===id);if(!b)return;document.getElementById('modalBillTitle').textContent=`${b.name} - ${b.savedDate}`;document.getElementById('modalBillItems').innerHTML=b.products.map(p=>{const l=p.profit<0;return`<div class="modal-bill-item"><h4>${p.name}</h4><div class="item-detail"><span>MRP:</span><strong>₹${p.memberPrice.toFixed(2)}</strong></div><div class="item-detail"><span>Markup:</span><strong>${p.markup.toFixed(2)}%</strong></div><div class="item-detail"><span>Discount:</span><strong>${p.discount.toFixed(2)}%</strong></div><div class="item-detail"><span>Qty:</span><strong>${p.quantity}</strong></div><div class="item-detail"><span>Final:</span><strong style="color:#8BC34A">₹${p.finalPrice.toFixed(2)}</strong></div><div class="item-detail"><span>Profit:</span><strong style="color:${l?'#d32f2f':'#689F38'}">${l?'Loss':'Profit'}: ₹${Math.abs(p.profit).toFixed(2)}</strong></div></div>`;}).join('');document.getElementById('viewBillModal').classList.add('active');}
+
+    function closeModal(){document.getElementById('viewBillModal').classList.remove('active');}
+    function searchBills(){const q=document.getElementById('searchInput').value.toLowerCase();document.querySelectorAll('.bill-card').forEach(c=>{c.style.display=c.getAttribute('data-name').includes(q)?'block':'none';});}
+    function deleteBill(id){if(confirm('Delete bill?')){storage.bills=storage.bills.filter(b=>b.id!==id);saveToLocalStorage();loadBills();updateSummary();showSuccess('Deleted!');}}
+
+    function updateSummary(){const bills=storage.bills||[];const all=bills.flatMap(b=>b.products);document.getElementById('totalBills').textContent=bills.length;document.getElementById('totalProducts').textContent=all.length;const tr=all.reduce((s,p)=>s+p.finalPrice,0);const tp=all.reduce((s,p)=>s+p.profit,0);document.getElementById('totalRevenue').textContent=`₹${tr.toFixed(2)}`;document.getElementById('totalProfit').textContent=tp>=0?`₹${tp.toFixed(2)}`:`Loss: ₹${Math.abs(tp).toFixed(2)}`;}
+
+    function exportCSV(){const bills=storage.bills||[];if(!bills.length){alert('No bills');return;}let csv='Bill,Date,Product,MRP,Markup,Discount,Qty,Final,Profit\n';bills.forEach(b=>{b.products.forEach(p=>{csv+=`"${b.name}","${b.savedDate}","${p.name}",${p.memberPrice},${p.markup},${p.discount},${p.quantity},${p.finalPrice},${p.profit}\n`;});});const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`bills_${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(url);}
+
+    function printSummary(){window.print();}
+
+    function showPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));if(p==='input'){document.getElementById('inputPage').classList.add('active');document.querySelectorAll('.nav-btn')[0].classList.add('active');}else if(p==='saved'){document.getElementById('savedPage').classList.add('active');document.querySelectorAll('.nav-btn')[1].classList.add('active');loadBills();}else{document.getElementById('summaryPage').classList.add('active');document.querySelectorAll('.nav-btn')[2].classList.add('active');updateSummary();}}
+
+    function showSuccess(m){const msg=document.createElement('div');msg.className='success-message';msg.textContent=m;document.body.appendChild(msg);setTimeout(()=>msg.remove(),3000);}
+
+    init();
     </script>
 </body>
 </html>
