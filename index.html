@@ -1,244 +1,1249 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Herbalife Distributor Pricing</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        :root{--primary-green:#8BC34A;--dark-green:#689F38;--light-green:#DCEDC8;--bg-light:#F5F5F5;--bg-dark:#1a1a1a;--card-light:#fff;--card-dark:#2d2d2d;--text-light:#212121;--text-dark:#f5f5f5;--border-light:#e0e0e0;--border-dark:#444}
-        body{font-family:'Segoe UI',sans-serif;background:var(--bg-light);color:var(--text-light);transition:all 0.3s}
-        body.dark-mode{background:var(--bg-dark);color:var(--text-dark)}
-        .header{background:linear-gradient(135deg,var(--primary-green),var(--dark-green));color:#fff;padding:15px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-        .header h1{font-size:26px;margin-bottom:8px}
-        .header-controls{display:flex;gap:15px;align-items:center;flex-wrap:wrap;margin-top:15px}
-        .distributor-input{display:flex;gap:10px;flex:1;min-width:250px}
-        .distributor-input input{flex:1;padding:10px;border:none;border-radius:5px;font-size:14px}
-        .dark-mode-toggle{display:flex;align-items:center;gap:10px}
-        .toggle-switch{position:relative;width:50px;height:24px;background:rgba(255,255,255,0.3);border-radius:12px;cursor:pointer}
-        .toggle-switch.active{background:rgba(255,255,255,0.5)}
-        .toggle-slider{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:all 0.3s}
-        .toggle-switch.active .toggle-slider{left:28px}
-        .nav{background:var(--card-light);padding:12px 15px;display:flex;gap:12px;overflow-x:auto}
-        body.dark-mode .nav{background:var(--card-dark)}
-        .nav-btn{padding:8px 16px;background:var(--light-green);border:none;border-radius:5px;cursor:pointer;font-weight:600;color:var(--dark-green);white-space:nowrap;font-size:13px}
-        .nav-btn:hover,.nav-btn.active{background:var(--primary-green);color:#fff}
-        .container{max-width:1400px;margin:0 auto;padding:15px}
-        .page{display:none}.page.active{display:block}
-        .table-container{background:var(--card-light);border-radius:10px;padding:15px;overflow-x:auto;margin-bottom:15px}
-        body.dark-mode .table-container{background:var(--card-dark)}
-        table{width:100%;border-collapse:collapse;min-width:1100px}
-        th{background:var(--primary-green);color:#fff;padding:10px 8px;text-align:left;font-weight:600;font-size:13px}
-        td{padding:8px 6px;border-bottom:1px solid var(--border-light)}
-        body.dark-mode td{border-bottom:1px solid var(--border-dark)}
-        input[type="text"],input[type="number"],select{width:100%;padding:8px;border:1px solid var(--border-light);border-radius:5px;font-size:13px;background:var(--bg-light);color:var(--text-light)}
-        body.dark-mode input,body.dark-mode select{background:var(--bg-dark);color:var(--text-dark);border-color:var(--border-dark)}
-        .product-input-wrapper{position:relative;width:100%}
-        .product-dropdown-btn{position:absolute;right:5px;top:50%;transform:translateY(-50%);background:var(--primary-green);color:#fff;border:none;border-radius:3px;padding:4px 8px;cursor:pointer;font-size:12px;z-index:10}
-        .product-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--card-light);border:1px solid var(--border-light);border-radius:5px;z-index:1000;max-height:300px;overflow-y:auto;display:none;margin-top:5px}
-        body.dark-mode .product-dropdown{background:var(--card-dark);border-color:var(--border-dark)}
-        .product-dropdown.active{display:block}
-        .product-category{padding:10px 12px;background:var(--primary-green);color:#fff;font-weight:600;font-size:12px}
-        .product-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-light);font-size:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}
-        .product-item:hover{background:var(--light-green);color:var(--dark-green)}
-        .product-item-prices{display:flex;gap:6px;flex-wrap:wrap}
-        .price-tag{font-size:10px;background:#e8f5e9;color:#388e3c;padding:1px 5px;border-radius:3px;font-weight:600;white-space:nowrap}
-        .price-tag.mrp{background:#e3f2fd;color:#1565c0}
-        .btn-delete{background:#f44336;color:#fff;padding:6px 12px;border:none;border-radius:5px;cursor:pointer;font-size:12px}
-        .btn-add{background:var(--primary-green);color:#fff;padding:10px 20px;border:none;border-radius:5px;cursor:pointer;font-size:13px;font-weight:600;margin-top:10px}
-        .btn-save{background:#2196F3;color:#fff;padding:12px 30px;border:none;border-radius:5px;cursor:pointer;font-size:15px;font-weight:600;margin-top:12px;width:100%}
-        .bill-name-section{background:var(--card-light);border-radius:10px;padding:15px;margin-bottom:15px}
-        body.dark-mode .bill-name-section{background:var(--card-dark)}
-        .bill-name-input label{display:block;margin-bottom:8px;font-weight:600;color:var(--dark-green)}
-        .bills-container{display:grid;gap:15px}
-        .bill-card{background:var(--card-light);border-radius:10px;padding:18px;border-left:5px solid var(--primary-green)}
-        body.dark-mode .bill-card{background:var(--card-dark)}
-        .bill-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:15px;padding-bottom:12px;border-bottom:2px solid var(--border-light)}
-        .bill-date{font-size:12px;color:#999;font-style:italic}
-        .bill-actions{display:flex;gap:10px;flex-wrap:wrap}
-        .btn-view,.btn-download,.btn-delete-bill{padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:13px;font-weight:600}
-        .btn-view{background:var(--primary-green);color:#fff}
-        .btn-download{background:#2196F3;color:#fff}
-        .btn-delete-bill{background:#f44336;color:#fff}
-        .bill-items{margin:12px 0}
-        .bill-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-light);font-size:13px}
-        .bill-item-name{font-weight:600;flex:1}
-        .bill-summary{margin-top:20px;padding-top:15px;border-top:2px solid var(--primary-green)}
-        .bill-summary-row{display:flex;justify-content:space-between;padding:8px 0;font-size:15px;font-weight:600}
-        .search-bar{margin-bottom:15px}
-        .search-bar input{width:100%;padding:15px;border:1px solid var(--border-light);border-radius:10px;font-size:16px;background:var(--card-light)}
-        .summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;margin-bottom:15px}
-        .summary-card{background:var(--card-light);border-radius:10px;padding:20px;text-align:center}
-        body.dark-mode .summary-card{background:var(--card-dark)}
-        .summary-card h3{color:var(--primary-green);font-size:16px;margin-bottom:10px}
-        .summary-card .value{font-size:32px;font-weight:bold;color:var(--dark-green)}
-        .action-buttons{display:flex;gap:15px;margin-top:20px;flex-wrap:wrap}
-        .action-buttons button{flex:1;min-width:150px}
-        .btn-export{background:#4CAF50;color:#fff;padding:15px 30px;border:none;border-radius:5px;cursor:pointer;font-size:16px;font-weight:600}
-        .btn-print{background:#FF9800;color:#fff;padding:15px 30px;border:none;border-radius:5px;cursor:pointer;font-size:16px;font-weight:600}
-        .empty-state{text-align:center;padding:60px 20px;color:#999}
-        .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5)}
-        .modal.active{display:flex;align-items:center;justify-content:center}
-        .modal-content{background:var(--card-light);padding:25px;border-radius:10px;max-width:800px;max-height:80vh;overflow-y:auto;width:90%}
-        body.dark-mode .modal-content{background:var(--card-dark)}
-        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid var(--border-light)}
-        .modal-header h2{color:var(--dark-green);margin:0}
-        .close-btn{font-size:28px;font-weight:bold;color:#999;cursor:pointer;background:0;border:0;padding:0}
-        .modal-bill-item{padding:15px;background:var(--bg-light);border-radius:5px;margin-bottom:10px}
-        body.dark-mode .modal-bill-item{background:var(--bg-dark)}
-        .modal-bill-item h4{color:var(--dark-green);margin:0 0 10px 0;font-size:16px}
-        .item-detail{display:flex;justify-content:space-between;margin:5px 0;font-size:13px}
-        .loss-value{color:#d32f2f;font-weight:600}
-        .success-message{position:fixed;top:20px;right:20px;background:var(--primary-green);color:#fff;padding:15px 25px;border-radius:5px;z-index:9999;max-width:300px}
-        .watermark{position:fixed;bottom:10px;right:10px;background:rgba(139,195,74,0.1);padding:5px 12px;border-radius:15px;font-size:11px;color:var(--dark-green);z-index:999}
-        /* controls bar */
-        .controls-bar{background:var(--card-light);border-radius:10px;padding:15px 18px;margin-bottom:15px;display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap}
-        body.dark-mode .controls-bar{background:var(--card-dark)}
-        .ctrl-group{display:flex;flex-direction:column;gap:4px}
-        .ctrl-group label{font-weight:600;color:var(--dark-green);font-size:13px}
-        .ctrl-group input,.ctrl-group select{width:auto;min-width:120px;padding:8px;border:1px solid var(--border-light);border-radius:5px;font-size:13px}
-        .ctrl-notice{font-size:11px;color:#888;font-style:italic;margin-bottom:2px}
-        /* tier level badge */
-        .tier-badge{display:inline-block;font-size:11px;background:var(--light-green);color:var(--dark-green);padding:2px 7px;border-radius:4px;font-weight:700;margin-left:6px}
-        /* automode */
-        .automode-row{display:flex;align-items:center;gap:10px;margin-top:4px}
-        .automode-toggle{position:relative;width:50px;height:24px;background:#ccc;border-radius:12px;cursor:pointer;flex-shrink:0}
-        .automode-toggle.active{background:var(--primary-green)}
-        .automode-slider{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:all 0.3s}
-        .automode-toggle.active .automode-slider{left:28px}
-        .automode-status{font-size:12px;color:#888}
-        /* billing warning */
-        .billing-warning{background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#7a6000;font-style:italic}
-        body.dark-mode .billing-warning{background:#2a2200;border-color:#4a3800;color:#ffd54f}
-        .modal-billing-warning{background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:10px 14px;margin-bottom:15px;font-size:12px;color:#7a6000;font-style:italic}
-        body.dark-mode .modal-billing-warning{background:#2a2200;border-color:#4a3800;color:#ffd54f}
-        /* buy-price auto-filled */
-        .buy-price.auto-filled{border-color:var(--primary-green)!important;background:rgba(139,195,74,0.08)!important}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herbalife Pricing — Distributor App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --green:       #22c55e;
+    --green-dim:   #16a34a;
+    --green-glass: rgba(34,197,94,0.10);
+    --green-glow:  rgba(34,197,94,0.22);
+    --accent:      #6366f1;
+    --accent-glass:rgba(99,102,241,0.10);
+    --fg:          #18181b;
+    --fg2:         #3f3f46;
+    --fg3:         #a1a1aa;
+    --bg:          #f0fdf4;
+    --bg2:         #dcfce7;
+    --card:        #ffffff;
+    --card2:       #f7fffe;
+    --border:      rgba(34,197,94,0.14);
+    --border-soft: rgba(0,0,0,0.06);
+    --shadow:      0 2px 16px rgba(34,197,94,0.08), 0 1px 4px rgba(0,0,0,0.05);
+    --shadow-lg:   0 8px 40px rgba(34,197,94,0.13), 0 2px 10px rgba(0,0,0,0.07);
+    --radius:      20px;
+    --radius-sm:   13px;
+    --radius-xs:   9px;
+    --font-sans:   'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-serif:  'Instrument Serif', Georgia, serif;
+    --transition:  all 0.2s cubic-bezier(0.3,0,0.2,1);
+    --topbar-bg:   rgba(240,253,244,0.88);
+  }
+
+  body.dark {
+    --fg:    #f0fdf4;
+    --fg2:   #a1a1aa;
+    --fg3:   #52525b;
+    --bg:    #0a0f0d;
+    --bg2:   #0f1a12;
+    --card:  #111714;
+    --card2: #162019;
+    --border:rgba(34,197,94,0.16);
+    --border-soft:rgba(255,255,255,0.06);
+    --shadow:0 2px 20px rgba(0,0,0,0.45), 0 1px 4px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.35);
+    --topbar-bg: rgba(10,15,13,0.92);
+    --card2: #151e17;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { font-size: 16px; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--fg);
+    transition: background 0.35s, color 0.35s;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(34,197,94,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, rgba(99,102,241,0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  body.dark {
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(34,197,94,0.07) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, rgba(99,102,241,0.06) 0%, transparent 50%);
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--topbar-bg);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.35s;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    box-shadow: 0 3px 12px rgba(34,197,94,0.4), 0 1px 3px rgba(34,197,94,0.25);
+  }
+
+  .brand-name {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+    color: var(--fg);
+  }
+
+  .brand-sub {
+    font-size: 10.5px;
+    color: var(--green);
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    margin-top: 1px;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dist-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+
+  .dist-pill:focus-within {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-glass);
+  }
+
+  .dist-pill input {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    color: var(--fg);
+    width: 155px;
+    outline: none;
+    font-weight: 500;
+  }
+
+  .dist-pill input::placeholder { color: var(--fg3); font-weight: 400; }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+  }
+
+  .icon-btn:hover { transform: scale(1.07); box-shadow: var(--shadow-lg); border-color: var(--green); }
+  .icon-btn:active { transform: scale(0.95); }
+
+  /* ── TAB NAV ── */
+  .tab-nav {
+    display: flex;
+    justify-content: center;
+    padding: 16px 24px 0;
+    gap: 2px;
+  }
+
+  .tab-nav-inner {
+    display: flex;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    padding: 4px;
+    gap: 2px;
+    box-shadow: var(--shadow);
+  }
+
+  .tab-btn {
+    padding: 8px 24px;
+    border-radius: 100px;
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--fg3);
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(34,197,94,0.35), 0 1px 3px rgba(34,197,94,0.2);
+  }
+
+  .tab-btn:hover:not(.active) { color: var(--fg2); background: var(--green-glass); }
+
+  /* ── PAGES ── */
+  .page { display: none; padding: 20px 24px 48px; max-width: 1300px; margin: 0 auto; }
+  .page.active { display: block; animation: fadeUp 0.22s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #22c55e, #6366f1, transparent);
+    opacity: 0.6;
+  }
+
+  .card-header {
+    padding: 22px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--fg);
+  }
+
+  .card-subtitle {
+    font-size: 12px;
+    color: var(--fg3);
+    margin-top: 3px;
+  }
+
+  .card-body { padding: 20px 24px 26px; }
+
+  /* ── BILL NAME ROW ── */
+  .bill-name-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .field-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+  }
+
+  .field-note {
+    font-size: 10.5px;
+    color: var(--fg3);
+    font-style: italic;
+    margin-top: -2px;
+  }
+
+  .input, select.input {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--fg);
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    outline: none;
+    transition: var(--transition);
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  select.input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2322c55e' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+    padding-right: 34px;
+  }
+
+  .input:focus, select.input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3.5px var(--green-glass);
+    background: var(--card);
+  }
+
+  .input::placeholder { color: var(--fg3); }
+
+  body.dark .input, body.dark select.input {
+    background: var(--card2);
+    color: var(--fg);
+  }
+
+  /* ── CONTROLS STRIP ── */
+  .controls-strip {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, var(--green-glass), transparent);
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    margin-bottom: 20px;
+    align-items: flex-end;
+  }
+
+  .controls-strip .field-group { min-width: 140px; flex: 1; max-width: 240px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .toggle {
+    position: relative;
+    width: 46px;
+    height: 27px;
+    background: var(--border-soft);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    flex-shrink: 0;
+  }
+
+  .toggle:after {
+    content: '';
+    position: absolute;
+    top: 3.5px;
+    left: 3.5px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: var(--transition);
+    box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+  }
+
+  .toggle.on { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 2px 8px rgba(34,197,94,0.35); }
+  .toggle.on:after { left: calc(100% - 23.5px); }
+
+  .toggle-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg2);
+  }
+
+  /* ── LEVEL BADGE ── */
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--green-glass);
+    color: var(--green-dim);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 7px;
+    border: 1px solid var(--green-glow);
+    margin-left: 6px;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    margin-bottom: 18px;
+    box-shadow: inset 0 1px 4px rgba(34,197,94,0.04);
+  }
+
+  table {
+    width: 100%;
+    min-width: 1000px;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background: linear-gradient(135deg, var(--green-glass), rgba(99,102,241,0.04));
+    padding: 12px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 1.5px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(34,197,94,0.04); }
+
+  tbody td {
+    padding: 8px 8px;
+    vertical-align: middle;
+  }
+
+  .cell-input {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--fg);
+    background: transparent;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-xs);
+    padding: 7px 10px;
+    width: 100%;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .cell-input:focus {
+    background: var(--card);
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-glass);
+  }
+
+  .cell-input[readonly] {
+    color: var(--fg2);
+    cursor: default;
+    font-weight: 600;
+  }
+
+  .cell-input.auto-filled {
+    border-color: var(--green) !important;
+    background: var(--green-glass) !important;
+    color: var(--green-dim);
+    font-weight: 700;
+  }
+
+  .cell-input::placeholder { color: var(--fg3); }
+
+  body.dark .cell-input:focus { background: var(--card2); }
+
+  /* Product name cell */
+  .prod-wrap { position: relative; }
+
+  .prod-toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--green-glass);
+    color: var(--green-dim);
+    border: 1px solid var(--green-glow);
+    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    z-index: 5;
+  }
+
+  .prod-toggle:hover { background: var(--green-glow); transform: translateY(-50%) scale(1.08); }
+
+  .prod-dd {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    min-width: 340px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    z-index: 500;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .prod-dd.open { display: block; animation: fadeUp 0.15s ease; }
+
+  .dd-cat {
+    padding: 9px 14px 6px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--green-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    position: sticky;
+    top: 0;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+
+  .dd-item {
+    padding: 9px 14px;
+    font-size: 12.5px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.12s;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dd-item:last-child { border-bottom: none; }
+  .dd-item:hover { background: var(--green-glass); color: var(--green-dim); }
+
+  .dd-prices {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .dd-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+
+  .dd-tag.mrp { background: rgba(99,102,241,0.1); color: #6366f1; }
+  .dd-tag.buy { background: var(--green-glass); color: var(--green-dim); }
+
+  body.dark .dd-tag.mrp { background: rgba(99,102,241,0.18); color: #818cf8; }
+
+  /* profit cell */
+  .profit-pos { color: var(--green-dim); font-weight: 700; }
+  .profit-neg { color: #ef4444; font-weight: 700; }
+
+  /* del btn */
+  .del-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(239,68,68,0.25);
+    background: rgba(239,68,68,0.06);
+    color: #ef4444;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  .del-btn:hover { background: rgba(239,68,68,0.13); border-color: rgba(239,68,68,0.5); transform: scale(1.1) rotate(5deg); }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 22px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: var(--transition);
+    letter-spacing: -0.1px;
+  }
+
+  .btn:active { transform: scale(0.96); }
+
+  .btn-green {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    box-shadow: 0 2px 14px rgba(34,197,94,0.35), 0 1px 4px rgba(34,197,94,0.2);
+  }
+
+  .btn-green:hover { box-shadow: 0 4px 22px rgba(34,197,94,0.45), 0 2px 6px rgba(34,197,94,0.28); transform: translateY(-1.5px); }
+
+  .btn-outline {
+    background: var(--card);
+    color: var(--fg);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .btn-outline:hover { border-color: var(--green); color: var(--green-dim); box-shadow: 0 0 0 3px var(--green-glass); }
+
+  .btn-blue {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    box-shadow: 0 2px 12px rgba(99,102,241,0.35);
+  }
+
+  .btn-blue:hover { box-shadow: 0 4px 20px rgba(99,102,241,0.45); transform: translateY(-1.5px); }
+
+  .btn-red {
+    background: rgba(239,68,68,0.08);
+    color: #ef4444;
+    border: 1.5px solid rgba(239,68,68,0.18);
+  }
+
+  .btn-red:hover { background: rgba(239,68,68,0.14); }
+
+  .btn-full { width: 100%; justify-content: center; }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /* ── SAVE BAR ── */
+  .save-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 4px;
+  }
+
+  /* ── SAVED BILLS PAGE ── */
+  .bills-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr;
+  }
+
+  .bill-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    position: relative;
+  }
+
+  .bill-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #22c55e, #6366f1, transparent);
+    opacity: 0.5;
+  }
+
+  .bill-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); border-color: var(--green); }
+
+  .bill-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 22px 22px 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .bill-card-meta h3 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    margin-bottom: 5px;
+    color: var(--fg);
+  }
+
+  .bill-meta-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .bill-meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    color: var(--fg3);
+    background: var(--card2);
+    border: 1px solid var(--border);
+    padding: 3px 9px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+
+  .bill-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .bill-card-actions .btn {
+    padding: 8px 16px;
+    font-size: 12.5px;
+  }
+
+  .bill-divider { height: 1px; background: var(--border); margin: 0 22px; }
+
+  .bill-items-list { padding: 14px 22px; }
+
+  .bill-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .bill-item-row:last-child { border-bottom: none; }
+
+  .bill-item-name {
+    font-weight: 500;
+    color: var(--fg);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .bill-item-stats {
+    display: flex;
+    gap: 14px;
+    color: var(--fg3);
+    font-size: 12px;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  .bill-card-footer {
+    background: linear-gradient(135deg, var(--green-glass), transparent);
+    border-top: 1.5px solid var(--border);
+    padding: 16px 22px;
+    display: flex;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+
+  .footer-stat {
+    flex: 1;
+    min-width: 120px;
+    padding: 0 18px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .footer-stat:first-child { padding-left: 0; }
+  .footer-stat:last-child { border-right: none; padding-right: 0; }
+
+  .footer-stat-label {
+    font-size: 10.5px;
+    color: var(--fg3);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .footer-stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--fg);
+    letter-spacing: -0.7px;
+  }
+
+  .footer-stat-val.green { color: var(--green-dim); }
+  .footer-stat-val.red   { color: #ef4444; }
+
+  /* ── SEARCH ── */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 18px;
+  }
+
+  .search-wrap .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    color: var(--fg3);
+    pointer-events: none;
+  }
+
+  .search-wrap input {
+    padding-left: 42px;
+    height: 46px;
+    font-size: 14.5px;
+  }
+
+  /* ── SUMMARY PAGE ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 26px 24px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #22c55e, #6366f1);
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; right: -20px;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, var(--green-glass) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .stat-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card-val {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--fg);
+    line-height: 1;
+  }
+
+  .stat-card-val.green { color: var(--green-dim); }
+
+  /* ── MODAL ── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(6px);
+    z-index: 900;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 640px;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.25s cubic-bezier(0.34,1.2,0.64,1);
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-header {
+    padding: 24px 24px 18px;
+    border-bottom: 1.5px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--green-glass), transparent);
+  }
+
+  .modal-header h2 { font-size: 19px; font-weight: 800; letter-spacing: -0.5px; }
+  .modal-header .modal-sub { font-size: 12px; color: var(--fg3); margin-top: 3px; }
+
+  .modal-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--card2);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fg3);
+    transition: var(--transition);
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .modal-close:hover { color: #ef4444; border-color: #ef4444; transform: rotate(90deg); }
+
+  .modal-body { overflow-y: auto; padding: 20px 24px 24px; flex: 1; }
+
+  .modal-item {
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    transition: var(--transition);
+  }
+
+  .modal-item:hover { border-color: var(--green); }
+
+  .modal-item h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 12px;
+    letter-spacing: -0.2px;
+  }
+
+  .modal-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-detail:last-child { border-bottom: none; }
+  .modal-detail span:first-child { color: var(--fg3); }
+  .modal-detail strong { font-weight: 600; }
+
+  .modal-warning {
+    background: rgba(251,191,36,0.08);
+    border: 1.5px solid rgba(251,191,36,0.2);
+    border-radius: var(--radius-xs);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  body.dark .modal-warning { background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.18); color: #fbbf24; }
+
+  /* ── TOAST ── */
+  .toast-wrap {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    padding: 11px 22px;
+    border-radius: 100px;
+    font-size: 13.5px;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(34,197,94,0.4), 0 2px 8px rgba(0,0,0,0.15);
+    animation: toastIn 0.25s cubic-bezier(0.34,1.2,0.64,1);
+    white-space: nowrap;
+  }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.92); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── EMPTY ── */
+  .empty {
+    text-align: center;
+    padding: 64px 20px;
+    color: var(--fg3);
+  }
+
+  .empty-icon { font-size: 48px; margin-bottom: 14px; }
+  .empty h3 { font-size: 17px; font-weight: 700; color: var(--fg2); margin-bottom: 7px; }
+  .empty p  { font-size: 13.5px; }
+
+  /* ── WATERMARK ── */
+  .watermark {
+    position: fixed;
+    bottom: 12px;
+    right: 16px;
+    font-size: 11px;
+    color: var(--fg3);
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  /* ── MISC ── */
+  .sep { height: 1px; background: var(--border); margin: 16px 0; }
+
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--green-glow); border-radius: 10px; }
+
+  @media (max-width: 600px) {
+    .topbar { padding: 0 14px; }
+    .page { padding: 14px 14px 40px; }
+    .card-body { padding: 14px 16px 18px; }
+    .card-header { padding: 16px 16px 0; }
+    .controls-strip .field-group { max-width: 100%; }
+    .dist-pill input { width: 110px; }
+  }
+</style>
 </head>
 <body>
-<div class="header">
-    <h1>🌿 Herbalife Distributor Pricing App</h1>
-    <div class="header-controls">
-        <div class="distributor-input">
-            <input type="text" id="distributorName" placeholder="Enter Distributor Name">
-        </div>
-        <div class="dark-mode-toggle">
-            <span>☀️</span>
-            <div class="toggle-switch" id="darkModeToggle" onclick="toggleDarkMode()"><div class="toggle-slider"></div></div>
-            <span>🌙</span>
-        </div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">🌿</div>
+    <div>
+      <div class="brand-name">Herbalife Pricing</div>
+      <div class="brand-sub">Distributor Dashboard</div>
     </div>
-    <div id="currentDistributor" style="margin-top:10px;font-size:14px;"></div>
+  </div>
+  <div class="topbar-right">
+    <div class="dist-pill">
+      <span style="font-size:13px;color:var(--green)">👤</span>
+      <input type="text" id="distName" placeholder="Distributor name…">
+    </div>
+    <button class="icon-btn" id="darkBtn" onclick="toggleDark()" title="Dark mode">🌙</button>
+  </div>
 </div>
 
-<div class="nav">
-    <button class="nav-btn active" onclick="showPage('input')">📝 Product Input</button>
-    <button class="nav-btn" onclick="showPage('saved')">💾 Saved Bills</button>
-    <button class="nav-btn" onclick="showPage('summary')">📊 Summary</button>
+<!-- TAB NAV -->
+<div class="tab-nav">
+  <div class="tab-nav-inner">
+    <button class="tab-btn active" onclick="showTab('input',this)">Product Input</button>
+    <button class="tab-btn" onclick="showTab('saved',this)">Saved Bills</button>
+    <button class="tab-btn" onclick="showTab('summary',this)">Summary</button>
+  </div>
 </div>
 
-<div class="container">
-    <div id="inputPage" class="page active">
-        <div class="bill-name-section">
-            <div class="bill-name-input">
-                <label>📋 Bill Name:</label>
-                <input type="text" id="billName" placeholder="e.g., January Sales">
-            </div>
-        </div>
+<!-- INPUT PAGE -->
+<div id="tab-input" class="page active">
 
-        <!-- Controls Bar -->
-        <div class="controls-bar">
-            <!-- Distributor Level -->
-            <div class="ctrl-group">
-                <label>🏷️ Your Distributor Level</label>
-                <span class="ctrl-notice">*Sets your buy price from Herbalife's official price list</span>
-                <select id="distLevel" onchange="onLevelChange()">
-                    <option value="retail">Retail Price</option>
-                    <option value="earnBase">*Earn Base</option>
-                    <option value="p25">25% (Senior Consultant)</option>
-                    <option value="p35">35% (Qualified Producer)</option>
-                    <option value="p42">42% (Success Builder)</option>
-                    <option value="p50" selected>50% (Supervisor)</option>
-                </select>
-            </div>
-            <!-- Markup -->
-            <div class="ctrl-group">
-                <label>📈 Markup % on Buy Price</label>
-                <span class="ctrl-notice">*Added on top of your buy price to set customer selling price</span>
-                <input type="number" id="globalMarkup" value="0" min="0" step="0.01" oninput="onGlobalMarkupChange()">
-            </div>
-            <!-- Auto Mode -->
-            <div class="ctrl-group">
-                <label>🔄 Auto Markup Sync</label>
-                <div class="automode-row">
-                    <div class="automode-toggle" id="autoModeToggle" onclick="toggleAutoMode()"><div class="automode-slider"></div></div>
-                    <span class="automode-status" id="autoModeStatus">OFF</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="table-container">
-            <table id="productTable">
-                <thead><tr>
-                    <th style="width:230px">Product Name</th>
-                    <th style="width:100px">MRP (₹)</th>
-                    <th style="width:110px">Buy Price (₹) <span style="font-weight:400;font-size:10px">your level</span></th>
-                    <th style="width:90px">Markup %</th>
-                    <th style="width:110px">Sell Price (₹)</th>
-                    <th style="width:70px">Qty</th>
-                    <th style="width:110px">Final Price (₹)</th>
-                    <th style="width:90px">Profit (₹)</th>
-                    <th style="width:60px">Del</th>
-                </tr></thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-            <button class="btn-add" onclick="addRow()">➕ Add New Row</button>
-        </div>
-        <button class="btn-save" onclick="saveBill()">💾 Save Bill</button>
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-header">
+      <div>
+        <div class="card-title">New Bill</div>
+        <div class="card-subtitle">Enter a name and configure your pricing settings</div>
+      </div>
     </div>
-
-    <div id="savedPage" class="page">
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="🔍 Search bills by name..." oninput="searchBills()">
+    <div class="card-body">
+      <div class="bill-name-row">
+        <div class="field-group">
+          <label class="field-label">Bill Name</label>
+          <input class="input" type="text" id="billName" placeholder="e.g. January Sales">
         </div>
-        <div id="billsContainer" class="bills-container"></div>
+      </div>
+      <div class="controls-strip">
+        <div class="field-group">
+          <label class="field-label">Distributor Level</label>
+          <div class="field-note">Sets your buy price from Herbalife's price list</div>
+          <select class="input" id="distLevel" onchange="onLevelChange()">
+            <option value="retail">Retail Price</option>
+            <option value="earnBase">★ Earn Base</option>
+            <option value="p25">25% — Senior Consultant</option>
+            <option value="p35">35% — Qualified Producer</option>
+            <option value="p42">42% — Success Builder</option>
+            <option value="p50" selected>50% — Supervisor</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Global Markup %</label>
+          <div class="field-note">Added on top of buy price</div>
+          <input class="input" type="number" id="globalMarkup" value="0" min="0" step="0.01" oninput="onMarkupChange()">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Auto-Sync Markup</label>
+          <div class="field-note">Apply markup to all rows</div>
+          <div class="toggle-row">
+            <div class="toggle" id="autoToggle" onclick="toggleAuto()"></div>
+            <div>
+              <div class="toggle-label" id="autoLabel">Off</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div id="summaryPage" class="page">
-        <div class="summary-cards">
-            <div class="summary-card"><h3>Total Bills</h3><div class="value" id="totalBills">0</div></div>
-            <div class="summary-card"><h3>Total Products</h3><div class="value" id="totalProducts">0</div></div>
-            <div class="summary-card"><h3>Total Revenue</h3><div class="value" id="totalRevenue">₹0.00</div></div>
-            <div class="summary-card"><h3>Total Profit</h3><div class="value" id="totalProfit">₹0.00</div></div>
-        </div>
-        <div class="action-buttons">
-            <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
-            <button class="btn-print" onclick="printSummary()">🖨️ Print Summary</button>
-        </div>
+  <div class="card">
+    <div class="card-body" style="padding-top:22px">
+      <div class="table-wrap">
+        <table id="prodTable">
+          <thead>
+            <tr>
+              <th style="width:220px">Product</th>
+              <th style="width:90px">MRP (₹)</th>
+              <th style="width:100px">Buy Price (₹)</th>
+              <th style="width:80px">Markup %</th>
+              <th style="width:100px">Sell / Unit</th>
+              <th style="width:60px">Qty</th>
+              <th style="width:100px">Total (₹)</th>
+              <th style="width:85px">Profit (₹)</th>
+              <th style="width:44px"></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="save-bar">
+        <button class="btn btn-outline" onclick="addRow()">＋ Add Row</button>
+        <button class="btn btn-green" onclick="saveBill()">💾 Save Bill</button>
+      </div>
     </div>
+  </div>
 </div>
 
-<div id="viewBillModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 id="modalBillTitle"></h2>
-            <button class="close-btn" onclick="closeModal()">&times;</button>
-        </div>
-        <div class="modal-billing-warning">⚠️ <em>*Saved bills may not reflect current or accurate calculations if distributor level, markup, or prices changed after this bill was generated.</em></div>
-        <div id="modalBillItems"></div>
-    </div>
+<!-- SAVED PAGE -->
+<div id="tab-saved" class="page">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="input" type="text" id="searchInput" placeholder="Search bills…" oninput="searchBills()">
+  </div>
+  <div id="billsGrid" class="bills-grid"></div>
 </div>
 
+<!-- SUMMARY PAGE -->
+<div id="tab-summary" class="page">
+  <div class="summary-grid" id="summaryGrid">
+    <div class="stat-card">
+      <div class="stat-card-label">Total Bills</div>
+      <div class="stat-card-val" id="sTotalBills">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total Products</div>
+      <div class="stat-card-val" id="sTotalProds">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total Revenue</div>
+      <div class="stat-card-val" id="sTotalRev">₹0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total Profit</div>
+      <div class="stat-card-val green" id="sTotalProfit">₹0</div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-green" onclick="exportCSV()">↓ Export CSV</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨 Print Summary</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalTitle">Bill Details</h2>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-warning">⚠️ Saved bills may not reflect current calculations if distributor level, markup, or prices changed after this bill was generated.</div>
+      <div id="modalItems"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
 <div class="watermark">Made by Vedant Suryawanshi</div>
 
 <script>
-// ─── OFFICIAL HERBALIFE PRICE TABLE (from Associates Price List, 01-Nov-2025) ──
-// Each entry: [MRP, retail, earnBase, p25, p35, p42, p50]
-// Source: Herbalife International India Pvt. Ltd. official price list
+// ─── PRICE TABLE ──────────────────────────────────────────────────────────────
 const PRICE_TABLE = {
-  // WEIGHT MANAGEMENT
   'formula 1 - nutritional shake mix - vanilla - 500 gms':        [2179,2075,1776,1713,1526,1396,1246],
   'formula 1 - nutritional shake mix - chocolate - 500 gms':      [2179,2075,1776,1713,1526,1396,1246],
   'formula 1 - nutritional shake mix - mango - 500 gms':          [2179,2075,1776,1713,1526,1396,1246],
@@ -255,25 +1260,18 @@ const PRICE_TABLE = {
   'personalized protein powder - 200 gms': [1295,1233,1054,1018,907,830,741],
   'personalized protein powder - 400 gms': [2485,2366,2023,1953,1741,1592,1422],
   'shakemate - 500 gms':            [653,621,531,572,540,517,491],
-  // EYE HEALTH
   'liftoff watermelon (30 packets)': [4119,3922,3354,3238,2886,2639,2357],
   'ocular defense':                  [1927,1835,1570,1515,1350,1234,1103],
-  // MEN'S HEALTH
   'male factor +':                   [3410,3247,2776,2681,2389,2185,1952],
-  // WOMEN'S HEALTH
   "woman's choice":                  [1245,1185,1013,978,872,798,712],
-  // BRAIN HEALTH
   'vritilife brain health - 60 tablets': [1464,1394,1192,1151,1026,938,838],
-  // SKIN & BODY CARE
   'vritilife facial cleanser (100 ml)': [1165,987,844,916,816,746,667],
   'vritilife facial toner (100 ml)':    [1322,1120,958,1039,926,847,756],
   'vritilife facial serum (30 ml)':     [3022,2561,2190,2376,2118,1937,1730],
   'vritilife moisturizer (100 ml)':     [1473,1248,1067,1158,1032,944,843],
   'hn - skin booster - orange - 10gms * 30 sachets': [3910,3723,2749,3188,2899,2697,2466],
   'hn - skin booster canister':         [3910,3723,2849,3161,2862,2653,2413],
-  // IMMUNITY
   'vritilife immune health - 60 tablets': [1528,1455,1245,1201,1070,979,874],
-  // ENERGY
   'afresh energy drink mix - ginger - 50 gms':        [812,773,662,646,580,534,481],
   'afresh energy drink mix - elaichi - 50 gms':       [812,773,662,638,568,520,464],
   'afresh energy drink mix - lemon - 50 gms':         [812,773,662,638,568,520,464],
@@ -281,626 +1279,543 @@ const PRICE_TABLE = {
   'afresh energy drink mix - cinnamon - 50 gms':      [812,773,662,638,568,520,464],
   'afresh energy drink mix - kashmiri kahwa - 40 gms':[812,773,662,638,568,520,464],
   'afresh energy drink mix - tulsi (basil) - 50 gms': [812,773,630,646,580,534,481],
-  // SPORTS
   'h24 hydrate - 5gms * 20 sachets':          [1636,1558,1333,1286,1146,1048,936],
   'h24 rebuild strength - 50gms * 10 sachets':[2616,2491,2035,2081,1868,1718,1547],
-  // CHILDREN
-  'dinoshake - chocolicious - 200 gms':                              [1115,1061,908,876,780,714,637],
-  'dinoshake nutritional children\'s drink mix - strawberry - 200 gms':[1115,1061,908,876,780,714,637],
-  // DIGESTIVE
+  'dinoshake - chocolicious - 200 gms':       [1115,1061,908,876,780,714,637],
+  "dinoshake nutritional children's drink mix - strawberry - 200 gms":[1115,1061,908,876,780,714,637],
   'activated fiber - 90 tablets':                      [1636,1558,1333,1286,1146,1048,936],
   'active fiber complex - unflavoured - 200 gms':      [2559,2437,2084,2012,1793,1640,1465],
   'aloe plus - 60 capsules':                           [1059,1008,863,832,741,678,605],
   'herbal aloe concentrate - unflavored (original) - 500 ml':[2696,2567,2195,2119,1889,1727,1543],
   'simply probiotic - 1gms * 30 sachets':              [2209,2103,1799,1736,1547,1415,1264],
   'vritilife triphala':                                [1089,1037,887,856,763,698,623],
-  // BONE & JOINT
   'herbalife calcium tablets - 60 tablets': [1203,1145,979,945,842,771,688],
   'joint support - 90 tablets':             [2455,2338,2000,1930,1720,1573,1405],
-  // CARDIOVASCULAR
   'herbalife niteworks - 300 gms': [7128,6788,5804,5604,4994,4568,4080],
   'herbalifeline - 60 softgels':   [2667,2540,2172,2097,1869,1709,1527],
   'beta heart - vanilla flavour - 15 gms * 15 sachets':[2242,2135,1576,1828,1663,1547,1414],
-  // ENHANCERS
   'multivitamin mineral & herbal - 90 tablets':[2004,1908,1632,1575,1404,1284,1147],
   'sleep enhance':                             [1697,1616,1382,1334,1189,1087,971],
-  // SLEEP SUPPORT
   'cell activator - new - 60 tablets':  [2215,2109,1804,1741,1551,1419,1267],
   'cell-u-loss advanced - 90 tablets':  [1705,1623,1388,1340,1194,1092,975],
   'herbal control - 90 tablets':        [3433,3269,2796,2699,2405,2199,1965],
 };
 
-// Level key → index in PRICE_TABLE arrays
-const LEVEL_IDX = {retail:1, earnBase:2, p25:3, p35:4, p42:5, p50:6};
-const LEVEL_LABEL = {retail:'Retail Price', earnBase:'*Earn Base', p25:'25%', p35:'35%', p42:'42%', p50:'50%'};
+const LEVEL_IDX   = {retail:1, earnBase:2, p25:3, p35:4, p42:5, p50:6};
+const LEVEL_LABEL = {retail:'Retail',earnBase:'Earn Base',p25:'25%',p35:'35%',p42:'42%',p50:'50%'};
 
-// Normalize product name for lookup
-function normName(s){
-  if(!s) return '';
-  return s.trim().toLowerCase()
-    .replace(/[®™–—]/g,'')
-    .replace(/\s*-\s*/g,' - ')
-    .replace(/\s+/g,' ')
-    .replace(/500\s*gms/g,'500 gms')
-    .replace(/750\s*gms/g,'750 gms');
-}
-
-function getPrices(productName){
-  const key = normName(productName);
-  if(PRICE_TABLE[key]) return PRICE_TABLE[key];
-  // fuzzy: try contains
-  for(const [k,v] of Object.entries(PRICE_TABLE)){
-    if(key.includes(k) || k.includes(key)) return v;
-  }
-  // fuzzy: ignore special chars
-  const strip = s => s.replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
-  const sk = strip(key);
-  for(const [k,v] of Object.entries(PRICE_TABLE)){
-    if(strip(k) === sk) return v;
-  }
-  return null;
-}
-
-function getMRP(productName){ const p=getPrices(productName); return p?p[0]:null; }
-function getBuyPrice(productName, level){ const p=getPrices(productName); return p?p[LEVEL_IDX[level]||6]:null; }
-
-// Product categories list
 const productCategories = {
-  'WEIGHT MANAGEMENT': [
-    'Formula 1 - Nutritional Shake Mix - Vanilla - 500 gms',
-    'Formula 1 - Nutritional Shake Mix - Chocolate - 500 gms',
-    'Formula 1 - Nutritional Shake Mix - Mango - 500 gms',
-    'Formula 1 - Nutritional Shake Mix - Orange Cream - 500 gms',
-    'Formula 1 - Nutritional Shake Mix - Strawberry - 500 gms',
-    'Formula 1 - Nutritional Shake Mix - Kulfi - 500 gms',
-    'Formula 1 - Nutritional Shake Mix - Banana Caramel - 500 gms',
-    'Formula 1 - Nutritional Shake Mix - Rose Kheer - 500 gms',
-    'Formula 1 Nutritional Shake Mix - Paan - 500 gms',
-    'Formula 1 Mango - 750 gms','Formula 1 Vanilla - 750 gms',
-    'Formula 1 Kulfi - 750 gms','Formula 1 Rose Kheer - 750 gms',
-    'Personalized Protein Powder - 200 gms','Personalized Protein Powder - 400 gms',
-    'ShakeMate - 500 gms'
-  ],
-  'EYE HEALTH': ['Ocular Defense','Liftoff Watermelon (30 Packets)'],
-  "MEN'S HEALTH": ['Male Factor +'],
-  "WOMEN'S HEALTH": ["Woman's Choice"],
-  'BRAIN HEALTH': ['Vritilife Brain Health - 60 tablets'],
-  'SKIN & BODY CARE': [
-    'Vritilife Facial Cleanser (100 ml)','Vritilife Facial Toner (100 ml)',
-    'Vritilife Moisturizer (100 ml)','Vritilife Facial Serum (30 ml)',
-    'HN - Skin Booster Canister','HN - Skin Booster - Orange - 10gms * 30 Sachets'
-  ],
-  'IMMUNITY': ['Vritilife Immune Health - 60 tablets'],
-  'ENERGY': [
-    'Afresh Energy Drink Mix - Ginger - 50 gms','Afresh Energy Drink Mix - Elaichi - 50 gms',
-    'Afresh Energy Drink Mix - Lemon - 50 gms','Afresh Energy Drink Mix - Peach - 50 gms',
-    'Afresh Energy Drink Mix - Cinnamon - 50 gms','Afresh Energy Drink Mix - Kashmiri Kahwa - 40 gms',
-    'Afresh Energy Drink Mix - Tulsi (Basil) - 50 gms'
-  ],
-  'SPORTS': ['H24 Hydrate - 5gms * 20 Sachets','H24 Rebuild Strength - 50gms * 10 Sachets'],
-  'CHILDREN': [
-    'DinoShake - Chocolicious - 200 gms',
-    "Dinoshake Nutritional Children's Drink Mix - Strawberry - 200 gms"
-  ],
-  'DIGESTIVE': [
-    'Activated Fiber - 90 tablets','Active Fiber Complex - Unflavoured - 200 gms',
-    'Aloe Plus - 60 capsules','Herbal Aloe Concentrate - Unflavored (Original) - 500 ml',
-    'Simply Probiotic - 1gms * 30 Sachets','Vritilife Triphala'
-  ],
-  'BONE & JOINT': ['Herbalife Calcium Tablets - 60 tablets','Joint Support - 90 tablets'],
-  'CARDIOVASCULAR': [
-    'Herbalife Niteworks - 300 gms','Herbalifeline - 60 softgels',
-    'Beta Heart - Vanilla Flavour - 15 gms * 15 Sachets'
-  ],
-  'ENHANCERS': ['Multivitamin Mineral & Herbal - 90 tablets','Sleep Enhance'],
-  'SLEEP SUPPORT': ['Cell Activator - New - 60 Tablets','Cell-U-Loss Advanced - 90 Tablets','Herbal Control - 90 Tablets']
+  'Weight Management': ['Formula 1 - Nutritional Shake Mix - Vanilla - 500 gms','Formula 1 - Nutritional Shake Mix - Chocolate - 500 gms','Formula 1 - Nutritional Shake Mix - Mango - 500 gms','Formula 1 - Nutritional Shake Mix - Orange Cream - 500 gms','Formula 1 - Nutritional Shake Mix - Strawberry - 500 gms','Formula 1 - Nutritional Shake Mix - Kulfi - 500 gms','Formula 1 - Nutritional Shake Mix - Banana Caramel - 500 gms','Formula 1 - Nutritional Shake Mix - Rose Kheer - 500 gms','Formula 1 Nutritional Shake Mix - Paan - 500 gms','Formula 1 Mango - 750 gms','Formula 1 Vanilla - 750 gms','Formula 1 Kulfi - 750 gms','Formula 1 Rose Kheer - 750 gms','Personalized Protein Powder - 200 gms','Personalized Protein Powder - 400 gms','ShakeMate - 500 gms'],
+  'Eye Health': ['Ocular Defense','Liftoff Watermelon (30 Packets)'],
+  "Men's Health": ['Male Factor +'],
+  "Women's Health": ["Woman's Choice"],
+  'Brain Health': ['Vritilife Brain Health - 60 tablets'],
+  'Skin & Body Care': ['Vritilife Facial Cleanser (100 ml)','Vritilife Facial Toner (100 ml)','Vritilife Moisturizer (100 ml)','Vritilife Facial Serum (30 ml)','HN - Skin Booster Canister','HN - Skin Booster - Orange - 10gms * 30 Sachets'],
+  'Immunity': ['Vritilife Immune Health - 60 tablets'],
+  'Energy': ['Afresh Energy Drink Mix - Ginger - 50 gms','Afresh Energy Drink Mix - Elaichi - 50 gms','Afresh Energy Drink Mix - Lemon - 50 gms','Afresh Energy Drink Mix - Peach - 50 gms','Afresh Energy Drink Mix - Cinnamon - 50 gms','Afresh Energy Drink Mix - Kashmiri Kahwa - 40 gms','Afresh Energy Drink Mix - Tulsi (Basil) - 50 gms'],
+  'Sports': ['H24 Hydrate - 5gms * 20 Sachets','H24 Rebuild Strength - 50gms * 10 Sachets'],
+  'Children': ['DinoShake - Chocolicious - 200 gms',"Dinoshake Nutritional Children's Drink Mix - Strawberry - 200 gms"],
+  'Digestive': ['Activated Fiber - 90 tablets','Active Fiber Complex - Unflavoured - 200 gms','Aloe Plus - 60 capsules','Herbal Aloe Concentrate - Unflavored (Original) - 500 ml','Simply Probiotic - 1gms * 30 Sachets','Vritilife Triphala'],
+  'Bone & Joint': ['Herbalife Calcium Tablets - 60 tablets','Joint Support - 90 tablets'],
+  'Cardiovascular': ['Herbalife Niteworks - 300 gms','Herbalifeline - 60 softgels','Beta Heart - Vanilla Flavour - 15 gms * 15 Sachets'],
+  'Enhancers': ['Multivitamin Mineral & Herbal - 90 tablets','Sleep Enhance'],
+  'Sleep Support': ['Cell Activator - New - 60 Tablets','Cell-U-Loss Advanced - 90 Tablets','Herbal Control - 90 Tablets']
 };
 
+function normName(s){ return s?s.trim().toLowerCase().replace(/[®™–—]/g,'').replace(/\s*-\s*/g,' - ').replace(/\s+/g,' '):''; }
+function getPrices(n){ const k=normName(n); if(PRICE_TABLE[k]) return PRICE_TABLE[k]; for(const[ki,v] of Object.entries(PRICE_TABLE)){if(k.includes(ki)||ki.includes(k)) return v;} return null; }
+function getMRP(n){ const p=getPrices(n); return p?p[0]:null; }
+function getBuy(n,lv){ const p=getPrices(n); return p?p[LEVEL_IDX[lv]||6]:null; }
+
 // ─── STORAGE ──────────────────────────────────────────────────────────────────
-let storage = {distributorName:'', bills:[], darkMode:false, distLevel:'p50', globalMarkup:0, autoMode:false};
+let S = {distName:'',bills:[],dark:false,level:'p50',markup:0,auto:false};
 
-function loadFromLocalStorage(){
-  const s=localStorage.getItem('herbalifeStorage2');
-  if(s) try{ storage=Object.assign({distLevel:'p50',globalMarkup:0,autoMode:false}, JSON.parse(s)); }catch(e){}
-}
-function saveToLocalStorage(){ localStorage.setItem('herbalifeStorage2', JSON.stringify(storage)); }
+function load(){ try{ const d=localStorage.getItem('hbl3'); if(d) S=Object.assign({level:'p50',markup:0,auto:false},JSON.parse(d)); }catch(e){} }
+function save(){ localStorage.setItem('hbl3',JSON.stringify(S)); }
+function getLevel(){ return document.getElementById('distLevel').value||'p50'; }
+function getMarkup(){ return parseFloat(document.getElementById('globalMarkup').value)||0; }
 
-function getLevel(){ return document.getElementById('distLevel').value || 'p50'; }
-function getGlobalMarkup(){ return parseFloat(document.getElementById('globalMarkup').value)||0; }
-
-// ─── CALCULATION ──────────────────────────────────────────────────────────────
-// buyPrice = Herbalife's official price for distributor's level (GST-inclusive, fixed)
-// sellPrice = buyPrice × (1 + markup/100)   — what distributor charges customer
-// finalPrice = sellPrice × qty
-// profit = (sellPrice - buyPrice) × qty
-function computeRow(buyPrice, markup, qty){
-  const sellPrice  = buyPrice * (1 + markup / 100);
-  const finalPrice = sellPrice * qty;
-  const profit     = (sellPrice - buyPrice) * qty;
-  return {sellPrice, finalPrice, profit};
+// ─── DARK MODE ──────────────────────────────────────────────────────────────
+function toggleDark(){
+  S.dark = !S.dark; save();
+  document.body.classList.toggle('dark', S.dark);
+  document.getElementById('darkBtn').textContent = S.dark ? '☀️' : '🌙';
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-function init(){
-  loadFromLocalStorage();
-  loadDistributorName();
-  loadDarkMode();
-  document.getElementById('distLevel').value = storage.distLevel || 'p50';
-  document.getElementById('globalMarkup').value = storage.globalMarkup || 0;
-  if(storage.autoMode){
-    document.getElementById('autoModeToggle').classList.add('active');
-    document.getElementById('autoModeStatus').textContent = 'ON';
-  }
-  loadBills();
-  for(let i=0;i<5;i++) addRow();
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function showTab(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='saved') renderBills();
+  if(id==='summary') renderSummary();
 }
 
-function loadDistributorName(){
-  if(storage.distributorName){
-    document.getElementById('distributorName').value = storage.distributorName;
-    document.getElementById('currentDistributor').innerHTML = `Current Distributor: <strong>${storage.distributorName}</strong>`;
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function(){
-  const d = document.getElementById('distributorName');
-  if(d){ d.addEventListener('change', function(){
-    storage.distributorName = this.value.trim(); saveToLocalStorage();
-    document.getElementById('currentDistributor').innerHTML = `Current Distributor: <strong>${storage.distributorName}</strong>`;
-    showSuccess('Distributor name saved!');
-  });}
-});
-
-function toggleDarkMode(){
-  document.getElementById('darkModeToggle').classList.toggle('active');
-  document.body.classList.toggle('dark-mode');
-  storage.darkMode = document.body.classList.contains('dark-mode');
-  saveToLocalStorage();
-}
-function loadDarkMode(){
-  if(storage.darkMode){ document.body.classList.add('dark-mode'); document.getElementById('darkModeToggle').classList.add('active'); }
-}
-
-// ─── LEVEL / MARKUP CHANGE ───────────────────────────────────────────────────
+// ─── LEVEL / MARKUP ──────────────────────────────────────────────────────────
 function onLevelChange(){
-  storage.distLevel = getLevel(); saveToLocalStorage();
-  refreshAllBuyPrices();
-  showBillingWarning();
+  S.level = getLevel(); save();
+  document.querySelectorAll('#tableBody tr').forEach(r=>{ applyLevelToRow(r); });
 }
 
-function onGlobalMarkupChange(){
-  storage.globalMarkup = getGlobalMarkup(); saveToLocalStorage();
-  if(storage.autoMode){ syncMarkupToAllRows(); }
-  showBillingWarning();
+function onMarkupChange(){
+  S.markup = getMarkup(); save();
+  if(S.auto){ document.querySelectorAll('#tableBody tr').forEach(r=>{ r.querySelector('.c-mk').value=S.markup; calcRow(r); }); }
 }
 
-function toggleAutoMode(){
-  const tog = document.getElementById('autoModeToggle');
-  const st  = document.getElementById('autoModeStatus');
-  tog.classList.toggle('active');
-  storage.autoMode = tog.classList.contains('active');
-  st.textContent = storage.autoMode ? 'ON' : 'OFF';
-  saveToLocalStorage();
-  if(storage.autoMode) syncMarkupToAllRows();
+function toggleAuto(){
+  S.auto = !S.auto; save();
+  const tog = document.getElementById('autoToggle');
+  tog.classList.toggle('on', S.auto);
+  document.getElementById('autoLabel').textContent = S.auto ? 'On — syncing all rows' : 'Off';
+  if(S.auto){ document.querySelectorAll('#tableBody tr').forEach(r=>{ r.querySelector('.c-mk').value=S.markup; calcRow(r); }); }
 }
 
-function syncMarkupToAllRows(){
-  const mk = getGlobalMarkup();
-  document.querySelectorAll('#tableBody tr').forEach(r=>{
-    r.querySelector('.markup').value = mk;
-    calculateRow(r);
-  });
+function applyLevelToRow(r){
+  const name = r.querySelector('.c-name').value.trim();
+  if(!name) return; // skip empty rows
+  const bp   = getBuy(name, getLevel());
+  const mrp  = getMRP(name);
+  if(bp!==null){
+    const bpI = r.querySelector('.c-bp');
+    bpI.value = bp.toFixed(2);
+    bpI.classList.add('auto-filled');
+  }
+  if(mrp!==null) r.querySelector('.c-mrp').value = mrp.toFixed(2);
+  calcRow(r);
 }
 
-function refreshAllBuyPrices(){
-  const level = getLevel();
-  document.querySelectorAll('#tableBody tr').forEach(r=>{
-    const name = r.querySelector('.product-name').value.trim();
-    const bp = getBuyPrice(name, level);
-    const bpInput = r.querySelector('.buy-price');
-    if(bp !== null){ bpInput.value = bp.toFixed(2); bpInput.classList.add('auto-filled'); }
-    calculateRow(r);
-  });
-}
-
-// ─── ADD ROW ─────────────────────────────────────────────────────────────────
+// ─── TABLE ROWS ──────────────────────────────────────────────────────────────
+let rowId = 0;
 function addRow(){
-  const t = document.getElementById('tableBody');
-  const r = t.insertRow();
-  const i = t.rows.length - 1;
-  r.innerHTML = `
-    <td><div class="product-input-wrapper">
-      <input type="text" class="product-name" placeholder="Type or click ▼" data-row="${i}">
-      <button class="product-dropdown-btn" onclick="toggleDropdown(event,${i})">▼</button>
-      <div class="product-dropdown" id="dropdown-${i}"></div>
+  const tbody = document.getElementById('tableBody');
+  const id = rowId++;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><div class="prod-wrap">
+      <input class="cell-input c-name" type="text" placeholder="Type or choose ▼" data-rid="${id}">
+      <button class="prod-toggle" onclick="toggleDD(event,${id})">▼</button>
+      <div class="prod-dd" id="dd-${id}"></div>
     </div></td>
-    <td><input type="number" class="mrp-display" readonly placeholder="—" style="background:#f9f9f9;color:#888"></td>
-    <td><input type="number" class="buy-price" placeholder="Auto-fills" step="0.01" oninput="onBuyPriceInput(this)"></td>
-    <td><input type="number" class="markup" placeholder="0" step="0.01" value="${storage.globalMarkup||0}" oninput="onMarkupInput(this)"></td>
-    <td><input type="number" class="sell-price" readonly></td>
-    <td><input type="number" class="quantity" value="1" min="1" step="1" oninput="calculateRow(this.closest('tr'))"></td>
-    <td><input type="number" class="final-price" readonly></td>
-    <td><input type="number" class="profit-display" readonly></td>
-    <td><button class="btn-delete" onclick="deleteRow(this)">🗑️</button></td>`;
-
-  buildDropdown(i);
+    <td><input class="cell-input c-mrp" type="number" readonly placeholder="—"></td>
+    <td><input class="cell-input c-bp" type="number" placeholder="Auto-fills" step="0.01" oninput="onBpInput(this)"></td>
+    <td><input class="cell-input c-mk" type="number" placeholder="0" step="0.01" value="${S.markup||0}" oninput="onMkInput(this)"></td>
+    <td><input class="cell-input c-sp" type="number" readonly></td>
+    <td><input class="cell-input c-qty" type="number" value="1" min="1" step="1" oninput="calcRow(this.closest('tr'))"></td>
+    <td><input class="cell-input c-fp" type="number" readonly></td>
+    <td><input class="cell-input c-prf" type="number" readonly></td>
+    <td><button class="del-btn" onclick="if(confirm('Delete this row?')) this.closest('tr').remove()">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  buildDD(id);
 }
 
-function buildDropdown(i){
-  const drop = document.getElementById(`dropdown-${i}`);
-  const level = getLevel();
+function buildDD(id){
+  const dd = document.getElementById(`dd-${id}`);
+  const lv = getLevel();
   let html = '';
-  for(const [cat, prods] of Object.entries(productCategories)){
-    html += `<div class="product-category">${cat}</div>`;
+  for(const[cat,prods] of Object.entries(productCategories)){
+    html += `<div class="dd-cat">${cat}</div>`;
     prods.forEach(p=>{
-      const prices = getPrices(p);
-      const mrpTag  = prices ? `<span class="price-tag mrp">MRP ₹${prices[0]}</span>` : '';
-      const buyTag  = prices ? `<span class="price-tag">Buy ₹${prices[LEVEL_IDX[level]||6]}</span>` : '';
-      html += `<div class="product-item" onclick="selectProduct('${p.replace(/'/g,"\\'")}',${i})">
+      const pr = getPrices(p);
+      const mrpT = pr ? `<span class="dd-tag mrp">MRP ₹${pr[0]}</span>` : '';
+      const buyT = pr ? `<span class="dd-tag buy">Buy ₹${pr[LEVEL_IDX[lv]||6]}</span>` : '';
+      html += `<div class="dd-item" onclick="pickProduct('${p.replace(/'/g,"\\'")}',${id})">
         <span>${p}</span>
-        <div class="product-item-prices">${mrpTag}${buyTag}</div>
+        <div class="dd-prices">${mrpT}${buyT}</div>
       </div>`;
     });
   }
-  drop.innerHTML = html;
+  dd.innerHTML = html;
 }
 
-function toggleDropdown(e, i){
-  e.preventDefault();
-  const d = document.getElementById(`dropdown-${i}`);
-  d.classList.toggle('active');
-  document.querySelectorAll('.product-dropdown').forEach(x=>{ if(x.id!==`dropdown-${i}`) x.classList.remove('active'); });
+function toggleDD(e,id){
+  e.preventDefault(); e.stopPropagation();
+  const dd = document.getElementById(`dd-${id}`);
+  const wasOpen = dd.classList.contains('open');
+  document.querySelectorAll('.prod-dd.open').forEach(x=>x.classList.remove('open'));
+  if(!wasOpen) dd.classList.add('open');
 }
 
-function selectProduct(p, i){
-  const nameInput = document.querySelector(`input[data-row="${i}"]`);
-  nameInput.value = p;
-  document.getElementById(`dropdown-${i}`).classList.remove('active');
-  const row = nameInput.closest('tr');
-  const level = getLevel();
-  const prices = getPrices(p);
-  if(prices){
-    row.querySelector('.mrp-display').value = prices[0].toFixed(2);
-    const bp = prices[LEVEL_IDX[level]||6];
-    const bpInput = row.querySelector('.buy-price');
-    bpInput.value = bp.toFixed(2);
-    bpInput.classList.add('auto-filled');
-    calculateRow(row);
-    showSuccess(`✅ ${p} — Buy ₹${bp} (${LEVEL_LABEL[level]})`);
+document.addEventListener('click', ()=>{ document.querySelectorAll('.prod-dd.open').forEach(x=>x.classList.remove('open')); });
+
+function pickProduct(p, id){
+  const nameI = document.querySelector(`[data-rid="${id}"]`);
+  if(!nameI) return;
+  nameI.value = p;
+  document.getElementById(`dd-${id}`).classList.remove('open');
+  const r = nameI.closest('tr');
+  const lv = getLevel();
+  const pr = getPrices(p);
+  if(pr){
+    r.querySelector('.c-mrp').value = pr[0].toFixed(2);
+    const bpI = r.querySelector('.c-bp');
+    bpI.value = pr[LEVEL_IDX[lv]||6].toFixed(2);
+    bpI.classList.add('auto-filled');
+    calcRow(r);
+    toast(`✓ ${p.length>30?p.slice(0,30)+'…':p}`);
   } else {
-    row.querySelector('.mrp-display').value = '';
-    row.querySelector('.buy-price').value = '';
-    row.querySelector('.buy-price').classList.remove('auto-filled');
-    showSuccess(`Product selected — enter buy price manually`);
+    calcRow(r);
   }
 }
 
-// Live search in dropdown
-document.addEventListener('input', function(e){
-  if(!e.target.classList.contains('product-name')) return;
-  const i = e.target.getAttribute('data-row');
-  const d = document.getElementById(`dropdown-${i}`);
-  const q = e.target.value.toLowerCase();
-  if(q.length > 0){
-    let any = false;
-    d.querySelectorAll('.product-item').forEach(item=>{
-      const name = item.querySelector('span') ? item.querySelector('span').textContent : item.textContent;
-      const show = name.toLowerCase().includes(q);
-      item.style.display = show ? 'flex' : 'none';
-      if(show) any = true;
+document.addEventListener('input', e=>{
+  if(!e.target.classList.contains('c-name')) return;
+  const id = e.target.getAttribute('data-rid');
+  const dd = document.getElementById(`dd-${id}`);
+  const q  = e.target.value.toLowerCase();
+  if(q.length>0){
+    let any=false;
+    dd.querySelectorAll('.dd-item').forEach(el=>{
+      const vis = el.querySelector('span').textContent.toLowerCase().includes(q);
+      el.style.display = vis?'flex':'none';
+      if(vis) any=true;
     });
-    d.querySelectorAll('.product-category').forEach(cat=>{
-      let next = cat.nextElementSibling; let vis = false;
-      while(next && !next.classList.contains('product-category')){ if(next.style.display!=='none') vis=true; next=next.nextElementSibling; }
-      cat.style.display = vis ? 'block' : 'none';
+    dd.querySelectorAll('.dd-cat').forEach(cat=>{
+      let nxt=cat.nextElementSibling; let v=false;
+      while(nxt&&!nxt.classList.contains('dd-cat')){ if(nxt.style.display!=='none') v=true; nxt=nxt.nextElementSibling; }
+      cat.style.display=v?'block':'none';
     });
-    if(any) d.classList.add('active');
+    if(any) dd.classList.add('open'); else dd.classList.remove('open');
   } else {
-    d.querySelectorAll('.product-item,.product-category').forEach(x=>x.style.display='');
-    d.classList.remove('active');
+    dd.querySelectorAll('.dd-item,.dd-cat').forEach(x=>x.style.display='');
+    dd.classList.remove('open');
   }
 });
 
-function onBuyPriceInput(input){
+function onBpInput(input){
   input.classList.remove('auto-filled');
-  calculateRow(input.closest('tr'));
+  calcRow(input.closest('tr'));
 }
 
-function onMarkupInput(input){
-  if(storage.autoMode){
-    const v = parseFloat(input.value)||0;
-    document.getElementById('globalMarkup').value = v;
-    storage.globalMarkup = v; saveToLocalStorage();
-    document.querySelectorAll('#tableBody tr').forEach(r=>{ r.querySelector('.markup').value=v; calculateRow(r); });
+function onMkInput(input){
+  if(S.auto){
+    const v=parseFloat(input.value)||0;
+    document.getElementById('globalMarkup').value=v;
+    S.markup=v; save();
+    document.querySelectorAll('#tableBody tr').forEach(r=>{r.querySelector('.c-mk').value=v; calcRow(r);});
   } else {
-    calculateRow(input.closest('tr'));
-  }
-  showBillingWarning();
-}
-
-function calculateRow(row){
-  const bp  = parseFloat(row.querySelector('.buy-price').value)||0;
-  const mk  = parseFloat(row.querySelector('.markup').value)||0;
-  const qty = parseInt(row.querySelector('.quantity').value)||1;
-  if(bp === 0){ row.querySelector('.sell-price').value=''; row.querySelector('.final-price').value=''; row.querySelector('.profit-display').value=''; return; }
-  const {sellPrice, finalPrice, profit} = computeRow(bp, mk, qty);
-  row.querySelector('.sell-price').value  = sellPrice.toFixed(2);
-  row.querySelector('.final-price').value = finalPrice.toFixed(2);
-  row.querySelector('.profit-display').value = profit.toFixed(2);
-}
-
-function deleteRow(btn){ if(confirm('Delete this row?')) btn.closest('tr').remove(); }
-
-// ─── BILLING WARNING ─────────────────────────────────────────────────────────
-function showBillingWarning(){
-  if(!document.getElementById('globalBillingWarning')){
-    const el = document.createElement('div');
-    el.id = 'globalBillingWarning';
-    el.className = 'billing-warning';
-    el.innerHTML = '⚠️ <em>*Saved bills may not reflect current or accurate calculations if distributor level, markup, or prices changed after the bill was generated.</em>';
-    const bc = document.getElementById('billsContainer');
-    if(bc && bc.parentNode) bc.parentNode.insertBefore(el, bc);
+    calcRow(input.closest('tr'));
   }
 }
 
-// ─── SAVE BILL ───────────────────────────────────────────────────────────────
+function calcRow(r){
+  const bp  = parseFloat(r.querySelector('.c-bp').value)||0;
+  const mk  = parseFloat(r.querySelector('.c-mk').value)||0;
+  const qty = parseInt(r.querySelector('.c-qty').value)||1;
+  if(!bp){ r.querySelector('.c-sp').value=''; r.querySelector('.c-fp').value=''; r.querySelector('.c-prf').value=''; return; }
+  const sp  = bp*(1+mk/100);
+  const fp  = sp*qty;
+  const prf = (sp-bp)*qty;
+  r.querySelector('.c-sp').value  = sp.toFixed(2);
+  r.querySelector('.c-fp').value  = fp.toFixed(2);
+  const prfI = r.querySelector('.c-prf');
+  prfI.value = prf.toFixed(2);
+  prfI.className = 'cell-input c-prf ' + (prf<0?'profit-neg':'profit-pos');
+}
+
+// ─── SAVE BILL ────────────────────────────────────────────────────────────────
 function saveBill(){
   const bn = document.getElementById('billName').value.trim();
-  const dn = document.getElementById('distributorName').value.trim();
-  if(!bn){ alert('Enter bill name'); return; }
-  if(!dn){ alert('Enter distributor name'); return; }
-  storage.distributorName = dn; saveToLocalStorage();
-
-  const level = getLevel();
-  const rows  = document.querySelectorAll('#tableBody tr');
-  const prods = [];
+  const dn = document.getElementById('distName').value.trim();
+  if(!bn){ toast('⚠️ Enter a bill name'); return; }
+  if(!dn){ toast('⚠️ Enter distributor name'); return; }
+  S.distName=dn; save();
+  const lv=getLevel();
+  const rows=document.querySelectorAll('#tableBody tr');
+  const prods=[];
   rows.forEach(r=>{
-    const name = r.querySelector('.product-name').value.trim();
+    const name=r.querySelector('.c-name').value.trim();
     if(!name) return;
-    const mrp   = parseFloat(r.querySelector('.mrp-display').value)||0;
-    const bp    = parseFloat(r.querySelector('.buy-price').value)||0;
-    const mk    = parseFloat(r.querySelector('.markup').value)||0;
-    const qty   = parseInt(r.querySelector('.quantity').value)||1;
-    const sell  = parseFloat(r.querySelector('.sell-price').value)||0;
-    const fp    = parseFloat(r.querySelector('.final-price').value)||0;
-    const prf   = parseFloat(r.querySelector('.profit-display').value)||0;
-    if(bp === 0) return;
-    prods.push({name, mrp, buyPrice:bp, markup:mk, quantity:qty, sellPrice:sell, finalPrice:fp, profit:prf, level});
+    const bp=parseFloat(r.querySelector('.c-bp').value)||0;
+    if(!bp) return;
+    const mrp=parseFloat(r.querySelector('.c-mrp').value)||0;
+    const mk=parseFloat(r.querySelector('.c-mk').value)||0;
+    const qty=parseInt(r.querySelector('.c-qty').value)||1;
+    const sp=parseFloat(r.querySelector('.c-sp').value)||0;
+    const fp=parseFloat(r.querySelector('.c-fp').value)||0;
+    const prf=parseFloat(r.querySelector('.c-prf').value)||0;
+    prods.push({name,mrp,buyPrice:bp,markup:mk,quantity:qty,sellPrice:sp,finalPrice:fp,profit:prf,level:lv});
   });
-  if(!prods.length){ alert('Add at least one product with a buy price'); return; }
-
-  const bill = {
-    id: Date.now(), name: bn, distributor: dn,
-    products: prods, level, levelLabel: LEVEL_LABEL[level],
-    savedDate: new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}),
-    timestamp: Date.now()
-  };
-  storage.bills.push(bill); saveToLocalStorage();
-  showSuccess('✅ Bill saved!');
-  document.getElementById('billName').value = '';
-  document.getElementById('tableBody').innerHTML = '';
-  for(let i=0;i<5;i++) addRow();
-  loadBills(); updateSummary();
+  if(!prods.length){ toast('⚠️ Add at least one product with a buy price'); return; }
+  S.bills.push({id:Date.now(),name:bn,distributor:dn,products:prods,level:lv,levelLabel:LEVEL_LABEL[lv],savedDate:new Date().toLocaleDateString('en-IN',{year:'numeric',month:'short',day:'numeric'}),timestamp:Date.now()});
+  save();
+  toast('✓ Bill saved!');
+  document.getElementById('billName').value='';
+  document.getElementById('tableBody').innerHTML='';
+  rowId=0;
+  for(let i=0;i<4;i++) addRow();
 }
 
-// ─── LOAD BILLS ───────────────────────────────────────────────────────────────
-function loadBills(){
-  const bills = storage.bills || [];
-  const c = document.getElementById('billsContainer');
-  if(!bills.length){ c.innerHTML='<div class="empty-state"><h2>No bills saved yet</h2></div>'; return; }
-  const warn = `<div class="billing-warning">⚠️ <em>*Saved bills may not reflect current calculations if distributor level, markup, or prices changed after generation.</em></div>`;
-  c.innerHTML = warn + bills.map(b=>{
-    const totalRev  = b.products.reduce((s,p)=>s+p.finalPrice,0);
-    const totalProf = b.products.reduce((s,p)=>s+p.profit,0);
-    return `<div class="bill-card" data-name="${b.name.toLowerCase()}">
-      <div class="bill-header">
-        <div>
-          <h3 style="margin:0;color:var(--dark-green)">${b.name}</h3>
-          <div class="bill-date">📅 ${b.savedDate} &nbsp;|&nbsp; 🏷️ Level: <strong>${b.levelLabel||b.level||'—'}</strong></div>
-        </div>
-        <div class="bill-actions">
-          <button class="btn-view" onclick="viewBill(${b.id})">👁️ View</button>
-          <button class="btn-download" onclick="downloadBill(${b.id})">📥 PDF</button>
-          <button class="btn-delete-bill" onclick="deleteBill(${b.id})">🗑️ Delete</button>
-        </div>
-      </div>
-      <div class="bill-items">${b.products.map(p=>`
-        <div class="bill-item">
-          <div class="bill-item-name">${p.name}</div>
-          <div style="display:flex;gap:16px;font-size:12px">
-            <span>Qty: ${p.quantity}</span>
-            <span>Buy: ₹${p.buyPrice.toFixed(2)}</span>
-            <span>Sell: ₹${p.finalPrice.toFixed(2)}</span>
+// ─── RENDER BILLS ─────────────────────────────────────────────────────────────
+function renderBills(){
+  const q=(document.getElementById('searchInput').value||'').toLowerCase();
+  const bills=(S.bills||[]).filter(b=>b.name.toLowerCase().includes(q));
+  const wrap=document.getElementById('billsGrid');
+  if(!bills.length){
+    wrap.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><h3>${q?'No results found':'No saved bills yet'}</h3><p>${q?'Try a different search':'Go to Product Input and save your first bill.'}</p></div>`;
+    return;
+  }
+  wrap.innerHTML=bills.map(b=>{
+    const rev=b.products.reduce((s,p)=>s+p.finalPrice,0);
+    const prf=b.products.reduce((s,p)=>s+p.profit,0);
+    const isLoss=prf<0;
+    return `<div class="bill-card" data-bid="${b.id}">
+      <div class="bill-card-top">
+        <div class="bill-card-meta">
+          <h3>${b.name}</h3>
+          <div class="bill-meta-row">
+            <span class="bill-meta-pill">📅 ${b.savedDate}</span>
+            <span class="bill-meta-pill">🏷️ ${b.levelLabel||b.level||'—'}</span>
+            <span class="bill-meta-pill">📦 ${b.products.length} items</span>
           </div>
-        </div>`).join('')}
+        </div>
+        <div class="bill-card-actions">
+          <button class="btn btn-outline" onclick="viewBill(${b.id})" style="padding:8px 14px;font-size:12.5px">View</button>
+          <button class="btn btn-blue" onclick="downloadBill(${b.id})" style="padding:8px 14px;font-size:12.5px">PDF</button>
+          <button class="btn btn-red" onclick="deleteBill(${b.id})" style="padding:8px 14px;font-size:12.5px">Delete</button>
+        </div>
       </div>
-      <div class="bill-summary">
-        <div class="bill-summary-row"><span>Items:</span><span>${b.products.length}</span></div>
-        <div class="bill-summary-row"><span>Total Revenue:</span><span>₹${totalRev.toFixed(2)}</span></div>
-        <div class="bill-summary-row"><span>Total Profit:</span><span>${totalProf>=0?'₹'+totalProf.toFixed(2):'<span class="loss-value">Loss: ₹'+Math.abs(totalProf).toFixed(2)+'</span>'}</span></div>
+      <div class="bill-divider"></div>
+      <div class="bill-items-list">
+        ${b.products.slice(0,4).map(p=>`
+          <div class="bill-item-row">
+            <div class="bill-item-name">${p.name}</div>
+            <div class="bill-item-stats">
+              <span>×${p.quantity}</span>
+              <span>Buy ₹${p.buyPrice.toFixed(0)}</span>
+              <span>Total ₹${p.finalPrice.toFixed(0)}</span>
+            </div>
+          </div>`).join('')}
+        ${b.products.length>4?`<div style="font-size:12px;color:var(--fg3);padding:8px 0">+ ${b.products.length-4} more items</div>`:''}
+      </div>
+      <div class="bill-card-footer">
+        <div class="footer-stat">
+          <div class="footer-stat-label">Revenue</div>
+          <div class="footer-stat-val">₹${rev.toFixed(0)}</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-label">${isLoss?'Loss':'Profit'}</div>
+          <div class="footer-stat-val ${isLoss?'red':'green'}">₹${Math.abs(prf).toFixed(0)}</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-label">Margin</div>
+          <div class="footer-stat-val">${rev>0?((prf/rev)*100).toFixed(1):0}%</div>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
-// ─── VIEW BILL MODAL ──────────────────────────────────────────────────────────
-function viewBill(id){
-  const b = storage.bills.find(x=>x.id===id); if(!b) return;
-  document.getElementById('modalBillTitle').textContent = `${b.name} — ${b.savedDate}`;
-  document.getElementById('modalBillItems').innerHTML = b.products.map(p=>{
-    const isLoss = p.profit < 0;
-    return `<div class="modal-bill-item">
-      <h4>${p.name}</h4>
-      <div class="item-detail"><span>MRP:</span><strong>₹${(p.mrp||0).toFixed(2)}</strong></div>
-      <div class="item-detail"><span>Distributor Level:</span><strong>${b.levelLabel||b.level||'—'}</strong></div>
-      <div class="item-detail"><span>Buy Price (your cost):</span><strong>₹${p.buyPrice.toFixed(2)}</strong></div>
-      <div class="item-detail"><span>Markup:</span><strong>${p.markup.toFixed(2)}%</strong></div>
-      <div class="item-detail"><span>Sell Price / unit:</span><strong style="color:#8BC34A">₹${p.sellPrice.toFixed(2)}</strong></div>
-      <div class="item-detail"><span>Qty:</span><strong>${p.quantity}</strong></div>
-      <div class="item-detail"><span>Final Total:</span><strong style="color:#8BC34A">₹${p.finalPrice.toFixed(2)}</strong></div>
-      <div class="item-detail"><span>Profit / Loss:</span><strong style="color:${isLoss?'#d32f2f':'#689F38'}">${isLoss?'Loss':'Profit'}: ₹${Math.abs(p.profit).toFixed(2)}</strong></div>
-    </div>`;
-  }).join('');
-  document.getElementById('viewBillModal').classList.add('active');
-}
-
-function closeModal(){ document.getElementById('viewBillModal').classList.remove('active'); }
-
-// ─── DOWNLOAD PDF ─────────────────────────────────────────────────────────────
-function downloadBill(id){
-  const b = storage.bills.find(x=>x.id===id); if(!b) return;
-  const {jsPDF} = window.jspdf;
-  const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  const pageW = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
-  const margin = 15;
-  const colW = pageW - margin*2;
-  let y = margin;
-
-  // Header
-  doc.setFillColor(139,195,74); doc.rect(0,0,pageW,28,'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(18); doc.setFont('helvetica','bold');
-  doc.text('Herbalife Bill', margin, 11);
-  doc.setFontSize(10); doc.setFont('helvetica','normal');
-  doc.text('Herbalife Distributor Pricing App', margin, 18);
-  doc.text('Made by Vedant Suryawanshi', pageW-margin, 18, {align:'right'});
-  y = 35;
-
-  // Meta
-  doc.setTextColor(30,30,30); doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text(b.name, margin, y); y += 7;
-  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
-  doc.text(`Date: ${b.savedDate}  |  Level: ${b.levelLabel||b.level}  |  Distributor: ${b.distributor||'N/A'}`, margin, y);
-  y += 5;
-
-  // Warning box
-  doc.setFillColor(255,248,225); doc.setDrawColor(255,224,82);
-  doc.rect(margin, y, colW, 8, 'FD');
-  doc.setTextColor(122,96,0); doc.setFontSize(7.5); doc.setFont('helvetica','italic');
-  doc.text('*Saved bills may not reflect accurate calculations if distributor level or markup changed after bill was generated.', margin+2, y+5.5, {maxWidth:colW-4});
-  y += 11;
-
-  // Divider
-  doc.setDrawColor(139,195,74); doc.setLineWidth(0.5);
-  doc.line(margin, y, pageW-margin, y); y += 6;
-
-  // Table header
-  const cols = [
-    {label:'#',          w:8},
-    {label:'Product',    w:65},
-    {label:'MRP (₹)',    w:20},
-    {label:'Buy (₹)',    w:22},
-    {label:'Markup%',    w:18},
-    {label:'Sell/unit',  w:22},
-    {label:'Qty',        w:10},
-    {label:'Total (₹)',  w:22},
-  ];
-  doc.setFillColor(104,159,56); doc.rect(margin, y, colW, 8, 'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
-  let cx = margin+2;
-  cols.forEach(c=>{ doc.text(c.label, cx, y+5.5); cx+=c.w; });
-  y += 8;
-
-  doc.setFont('helvetica','normal');
-  b.products.forEach((p,idx)=>{
-    const rowH = 10;
-    if(y+rowH > pageH-35){
-      doc.addPage(); y=margin;
-      doc.setFillColor(104,159,56); doc.rect(margin,y,colW,8,'F');
-      doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
-      let hx=margin+2; cols.forEach(c=>{ doc.text(c.label,hx,y+5.5); hx+=c.w; });
-      y+=8; doc.setFont('helvetica','normal');
-    }
-    if(idx%2===0){ doc.setFillColor(240,248,230); doc.rect(margin,y,colW,rowH,'F'); }
-    doc.setTextColor(30,30,30); doc.setFontSize(8.5);
-    let name=p.name;
-    const maxW=cols[1].w-2;
-    while(doc.getTextWidth(name)>maxW && name.length>5) name=name.slice(0,-1);
-    if(name!==p.name) name=name.slice(0,-1)+'…';
-    const row=[String(idx+1), name, (p.mrp||0).toFixed(2), p.buyPrice.toFixed(2), p.markup.toFixed(2)+'%', p.sellPrice.toFixed(2), String(p.quantity), p.finalPrice.toFixed(2)];
-    cx=margin+2; row.forEach((v,vi)=>{ doc.text(v,cx,y+6.5); cx+=cols[vi].w; });
-    doc.setDrawColor(220,220,220); doc.setLineWidth(0.2); doc.line(margin,y+rowH,margin+colW,y+rowH);
-    y+=rowH;
-  });
-
-  // Summary
-  y+=4; doc.setDrawColor(139,195,74); doc.setLineWidth(0.6); doc.line(margin,y,pageW-margin,y); y+=6;
-  const totalRev  = b.products.reduce((s,p)=>s+p.finalPrice,0);
-  const totalProf = b.products.reduce((s,p)=>s+p.profit,0);
-  const sx = pageW-margin-70;
-  doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(50,50,50);
-  doc.text('Total Items:', sx, y); doc.setFont('helvetica','normal'); doc.text(`${b.products.length}`, pageW-margin, y, {align:'right'}); y+=7;
-  doc.setFont('helvetica','bold'); doc.text('Total Revenue:', sx, y); doc.setFont('helvetica','normal'); doc.text(`Rs.${totalRev.toFixed(2)}`, pageW-margin, y, {align:'right'}); y+=7;
-  const isLoss = totalProf < 0;
-  doc.setFont('helvetica','bold'); doc.setTextColor(isLoss?211:69, isLoss?47:160, isLoss?47:56);
-  doc.text(isLoss?'Total Loss:':'Total Profit:', sx, y); doc.setFont('helvetica','normal');
-  doc.text(`Rs.${Math.abs(totalProf).toFixed(2)}`, pageW-margin, y, {align:'right'}); y+=10;
-
-  // Footer
-  doc.setFontSize(8); doc.setTextColor(160,160,160); doc.setFont('helvetica','italic');
-  doc.text(`Generated on ${new Date().toLocaleString()}`, margin, pageH-8);
-  doc.text('Made by Vedant Suryawanshi', pageW-margin, pageH-8, {align:'right'});
-
-  const filename = `${b.name.replace(/[^a-zA-Z0-9_\- ]/g,'').trim().replace(/\s+/g,'_')}.pdf`;
-  doc.save(filename);
-  showSuccess(`📄 "${b.name}.pdf" downloaded!`);
-}
-
-// ─── SEARCH / DELETE / SUMMARY / EXPORT ──────────────────────────────────────
-function searchBills(){
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  document.querySelectorAll('.bill-card').forEach(c=>{ c.style.display = c.getAttribute('data-name').includes(q)?'block':'none'; });
-}
+function searchBills(){ renderBills(); }
 
 function deleteBill(id){
   if(!confirm('Delete this bill?')) return;
-  storage.bills = storage.bills.filter(b=>b.id!==id);
-  saveToLocalStorage(); loadBills(); updateSummary(); showSuccess('Deleted!');
+  S.bills=S.bills.filter(b=>b.id!==id); save(); renderBills(); renderSummary(); toast('Deleted');
 }
 
-function updateSummary(){
-  const bills = storage.bills||[];
-  const all   = bills.flatMap(b=>b.products);
-  document.getElementById('totalBills').textContent    = bills.length;
-  document.getElementById('totalProducts').textContent = all.length;
-  const tr = all.reduce((s,p)=>s+p.finalPrice,0);
-  const tp = all.reduce((s,p)=>s+p.profit,0);
-  document.getElementById('totalRevenue').textContent = `₹${tr.toFixed(2)}`;
-  document.getElementById('totalProfit').textContent  = tp>=0 ? `₹${tp.toFixed(2)}` : `Loss: ₹${Math.abs(tp).toFixed(2)}`;
+// ─── VIEW MODAL ───────────────────────────────────────────────────────────────
+function viewBill(id){
+  const b=S.bills.find(x=>x.id===id); if(!b) return;
+  document.getElementById('modalTitle').textContent=b.name;
+  document.getElementById('modalSub').textContent=`${b.savedDate} · Level: ${b.levelLabel||b.level}`;
+  document.getElementById('modalItems').innerHTML=b.products.map(p=>{
+    const isLoss=p.profit<0;
+    return `<div class="modal-item">
+      <h4>${p.name}</h4>
+      <div class="modal-detail"><span>MRP</span><strong>₹${(p.mrp||0).toFixed(2)}</strong></div>
+      <div class="modal-detail"><span>Buy Price (your cost)</span><strong>₹${p.buyPrice.toFixed(2)}</strong></div>
+      <div class="modal-detail"><span>Markup</span><strong>${p.markup.toFixed(2)}%</strong></div>
+      <div class="modal-detail"><span>Sell Price / unit</span><strong style="color:var(--green)">₹${p.sellPrice.toFixed(2)}</strong></div>
+      <div class="modal-detail"><span>Qty</span><strong>${p.quantity}</strong></div>
+      <div class="modal-detail"><span>Total</span><strong style="color:var(--green)">₹${p.finalPrice.toFixed(2)}</strong></div>
+      <div class="modal-detail"><span>${isLoss?'Loss':'Profit'}</span><strong style="color:${isLoss?'#ef4444':'var(--green)'}">₹${Math.abs(p.profit).toFixed(2)}</strong></div>
+    </div>`;
+  }).join('');
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeModal(); });
+
+// ─── DOWNLOAD PDF ─────────────────────────────────────────────────────────────
+function downloadBill(id){
+  const b=S.bills.find(x=>x.id===id); if(!b) return;
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight();
+  const m=15, cw=W-m*2;
+  let y=0;
+
+  // ── Header banner ──
+  doc.setFillColor(22,163,74);
+  doc.rect(0,0,W,32,'F');
+
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text('Herbalife',m,14);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Independent Distributor',m,21);
+
+  doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('INVOICE',W-m,13,{align:'right'});
+  doc.setFontSize(8.5); doc.setFont('helvetica','normal');
+  doc.text(`Date: ${b.savedDate}`,W-m,20,{align:'right'});
+  doc.text(`Ref: ${b.name}`,W-m,26,{align:'right'});
+
+  y=42;
+
+  // ── From box ──
+  doc.setFillColor(240,253,244);
+  doc.setDrawColor(187,247,208);
+  doc.roundedRect(m,y,cw/2-6,22,3,3,'FD');
+  doc.setTextColor(22,101,52); doc.setFontSize(8); doc.setFont('helvetica','bold');
+  doc.text('FROM',m+5,y+7);
+  doc.setTextColor(30,30,30); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text(b.distributor||'Distributor',m+5,y+14);
+  doc.setFontSize(8); doc.setTextColor(100,100,100);
+  doc.text('Herbalife Independent Distributor',m+5,y+20);
+
+  y+=32;
+
+  // ── Divider ──
+  doc.setDrawColor(187,247,208); doc.setLineWidth(0.4);
+  doc.line(m,y,W-m,y); y+=8;
+
+  // ── Table — customer-facing columns only ──
+  const cols=[
+    {l:'#',             w:10, align:'left'},
+    {l:'Product',       w:95, align:'left'},
+    {l:'MRP (₹)',       w:24, align:'right'},
+    {l:'Price/Unit (₹)',w:28, align:'right'},
+    {l:'Qty',           w:14, align:'right'},
+    {l:'Amount (₹)',    w:19, align:'right'},
+  ];
+
+  doc.setFillColor(22,163,74);
+  doc.rect(m,y,cw,9,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
+  let cx=m+3;
+  cols.forEach(c=>{
+    if(c.align==='right') doc.text(c.l, cx+c.w-3, y+6, {align:'right'});
+    else doc.text(c.l, cx, y+6);
+    cx+=c.w;
+  });
+  y+=9;
+
+  doc.setFont('helvetica','normal');
+  let grandTotal=0;
+  b.products.forEach((p,i)=>{
+    const rh=10;
+    if(y+rh>H-40){
+      doc.addPage(); y=m;
+      doc.setFillColor(22,163,74); doc.rect(m,y,cw,9,'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(8.5); doc.setFont('helvetica','bold');
+      let hx=m+3;
+      cols.forEach(c=>{ if(c.align==='right') doc.text(c.l,hx+c.w-3,y+6,{align:'right'}); else doc.text(c.l,hx,y+6); hx+=c.w; });
+      y+=9; doc.setFont('helvetica','normal');
+    }
+
+    if(i%2===0){ doc.setFillColor(240,253,244); doc.rect(m,y,cw,rh,'F'); }
+    doc.setTextColor(30,30,30); doc.setFontSize(8.5);
+
+    let name=p.name;
+    const maxW=cols[1].w-4;
+    while(doc.getTextWidth(name)>maxW&&name.length>4) name=name.slice(0,-1);
+    if(name!==p.name) name=name.slice(0,-1)+'…';
+
+    const row=[
+      String(i+1),
+      name,
+      `${(p.mrp||0).toFixed(0)}`,
+      `${p.sellPrice.toFixed(0)}`,
+      String(p.quantity),
+      `${p.finalPrice.toFixed(0)}`,
+    ];
+
+    cx=m+3;
+    row.forEach((v,vi)=>{
+      if(cols[vi].align==='right') doc.text(v, cx+cols[vi].w-3, y+7, {align:'right'});
+      else doc.text(v, cx, y+7);
+      cx+=cols[vi].w;
+    });
+
+    doc.setDrawColor(187,247,208); doc.setLineWidth(0.15);
+    doc.line(m,y+rh,m+cw,y+rh);
+    grandTotal+=p.finalPrice;
+    y+=rh;
+  });
+
+  // ── Total row ──
+  y+=4;
+  doc.setDrawColor(22,163,74); doc.setLineWidth(0.6);
+  doc.line(m,y,W-m,y); y+=2;
+  doc.setFillColor(220,252,231);
+  doc.rect(m,y,cw,12,'F');
+  doc.setTextColor(22,101,52); doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('TOTAL',m+5,y+9);
+  doc.text(`Rs. ${grandTotal.toFixed(2)}`,W-m-3,y+9,{align:'right'});
+  y+=20;
+
+  doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(120,120,120);
+  doc.text(`${b.products.length} item(s)  ·  All prices in INR`,m,y);
+
+  // ── Footer ──
+  doc.setFillColor(240,253,244);
+  doc.rect(0,H-20,W,20,'F');
+  doc.setDrawColor(187,247,208); doc.setLineWidth(0.3);
+  doc.line(0,H-20,W,H-20);
+  doc.setFontSize(8.5); doc.setTextColor(80,80,80); doc.setFont('helvetica','italic');
+  doc.text('Thank you for your purchase! For queries, contact your Herbalife distributor.',W/2,H-11,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(150,150,150);
+  doc.text(`Generated: ${new Date().toLocaleString()}`,m,H-5);
+  doc.text('Made by Vedant Suryawanshi',W-m,H-5,{align:'right'});
+
+  doc.save(`${b.name.replace(/[^a-zA-Z0-9_\- ]/g,'').trim().replace(/\s+/g,'_')}_invoice.pdf`);
+  toast('📄 Invoice downloaded!');
+}
+
+// ─── SUMMARY ──────────────────────────────────────────────────────────────────
+function renderSummary(){
+  const all=(S.bills||[]).flatMap(b=>b.products);
+  const rev=all.reduce((s,p)=>s+p.finalPrice,0);
+  const prf=all.reduce((s,p)=>s+p.profit,0);
+  document.getElementById('sTotalBills').textContent=S.bills.length;
+  document.getElementById('sTotalProds').textContent=all.length;
+  document.getElementById('sTotalRev').textContent=`₹${rev.toFixed(0)}`;
+  const el=document.getElementById('sTotalProfit');
+  el.textContent=prf>=0?`₹${prf.toFixed(0)}`:`-₹${Math.abs(prf).toFixed(0)}`;
+  el.className='stat-card-val '+(prf<0?'':'green');
 }
 
 function exportCSV(){
-  const bills = storage.bills||[];
-  if(!bills.length){ alert('No bills to export'); return; }
-  let csv = 'Bill,Date,Level,Product,MRP,BuyPrice,Markup%,SellPrice,Qty,FinalPrice,Profit\n';
-  bills.forEach(b=>{
-    b.products.forEach(p=>{
-      csv += `"${b.name}","${b.savedDate}","${b.levelLabel||b.level}","${p.name}",${p.mrp||0},${p.buyPrice},${p.markup},${p.sellPrice},${p.quantity},${p.finalPrice},${p.profit}\n`;
-    });
-  });
-  const blob = new Blob([csv],{type:'text/csv'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a'); a.href=url;
-  a.download = `herbalife_bills_${new Date().toISOString().split('T')[0]}.csv`;
-  a.click(); URL.revokeObjectURL(url);
+  if(!S.bills.length){ toast('No bills to export'); return; }
+  let csv='Bill,Date,Level,Product,MRP,BuyPrice,Markup%,SellPrice,Qty,FinalPrice,Profit\n';
+  S.bills.forEach(b=>b.products.forEach(p=>{
+    csv+=`"${b.name}","${b.savedDate}","${b.levelLabel||b.level}","${p.name}",${p.mrp||0},${p.buyPrice},${p.markup},${p.sellPrice},${p.quantity},${p.finalPrice},${p.profit}\n`;
+  }));
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`herbalife_${new Date().toISOString().split('T')[0]}.csv`; a.click();
 }
 
-function printSummary(){ window.print(); }
-
-function showPage(p){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-  if(p==='input'){ document.getElementById('inputPage').classList.add('active'); document.querySelectorAll('.nav-btn')[0].classList.add('active'); }
-  else if(p==='saved'){ document.getElementById('savedPage').classList.add('active'); document.querySelectorAll('.nav-btn')[1].classList.add('active'); loadBills(); }
-  else { document.getElementById('summaryPage').classList.add('active'); document.querySelectorAll('.nav-btn')[2].classList.add('active'); updateSummary(); }
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg){
+  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
+  document.getElementById('toastWrap').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(10px)'; el.style.transition='all 0.25s'; setTimeout(()=>el.remove(),260); },2500);
 }
 
-function showSuccess(m){
-  const el = document.createElement('div'); el.className='success-message'; el.textContent=m;
-  document.body.appendChild(el); setTimeout(()=>el.remove(), 3000);
-}
-
-init();
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(function init(){
+  load();
+  if(S.dark){ document.body.classList.add('dark'); document.getElementById('darkBtn').textContent='☀️'; }
+  if(S.distName){ document.getElementById('distName').value=S.distName; }
+  document.getElementById('distLevel').value=S.level||'p50';
+  document.getElementById('globalMarkup').value=S.markup||0;
+  if(S.auto){ document.getElementById('autoToggle').classList.add('on'); document.getElementById('autoLabel').textContent='On — syncing all rows'; }
+  for(let i=0;i<4;i++) addRow();
+  document.getElementById('distName').addEventListener('change', function(){ S.distName=this.value.trim(); save(); });
+})();
 </script>
 </body>
 </html>
