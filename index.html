@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,9 +14,27 @@
     --text:#eef0f2;
     --text-dim:#9aa1ab;
     --line:rgba(255,255,255,0.08);
+    --nav-bg:rgba(11,13,16,0.92);
+    --toggle-bg:#33363f;
+    --toggle-ball:#ffffff;
   }
+
+  [data-theme="light"] {
+    --ink:#f5f6fa;
+    --panel:#ffffff;
+    --panel-2:#eef0f2;
+    --accent:#ff3b5c;
+    --accent-2:#e67e22;
+    --text:#1e272e;
+    --text-dim:#57606f;
+    --line:rgba(0,0,0,0.08);
+    --nav-bg:rgba(245,246,250,0.92);
+    --toggle-bg:#e2e8f0;
+    --toggle-ball:#ff3b5c;
+  }
+
   *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{background:var(--ink);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;overflow-x:hidden;}
+  html,body{background:var(--ink);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;overflow-x:hidden;transition:background .3s, color .3s;}
 
   @font-face{
     font-family:'Anton-ish';
@@ -34,10 +52,10 @@
     transition:background .3s ease, padding .3s ease, box-shadow .3s ease;
   }
   .nav.scrolled{
-    background:rgba(11,13,16,0.92);
+    background:var(--nav-bg);
     backdrop-filter:blur(10px);
     padding:12px 48px;
-    box-shadow:0 6px 24px rgba(0,0,0,0.4);
+    box-shadow:0 6px 24px rgba(0,0,0,0.15);
     border-bottom:1px solid var(--line);
   }
   .brand{
@@ -69,6 +87,35 @@
   .badge-sub{background:rgba(255,59,92,.15);color:var(--accent);}
   .badge-dub{background:rgba(255,184,77,.15);color:var(--accent-2);}
 
+  /* ---------- THEME SWITCH TOGGLE ---------- */
+  .theme-toggle-wrapper {
+    display: flex;
+    align-items: center;
+  }
+  .theme-toggle-btn {
+    width: 44px;
+    height: 22px;
+    background-color: var(--toggle-bg);
+    border-radius: 50px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .theme-toggle-ball {
+    width: 16px;
+    height: 16px;
+    background-color: var(--toggle-ball);
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  [data-theme="light"] .theme-toggle-ball {
+    transform: translateX(22px);
+  }
+
   /* ---------- HERO ---------- */
   .hero{
     position:relative;height:92vh;min-height:600px;
@@ -82,6 +129,12 @@
       linear-gradient(180deg, rgba(11,13,16,0.2) 0%, rgba(11,13,16,0.6) 55%, var(--ink) 100%),
       linear-gradient(120deg, #1a1030 0%, #0b0d10 60%);
     z-index:0;
+  }
+  [data-theme="light"] .hero-bg {
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 20%, rgba(255,59,92,.12), transparent),
+      linear-gradient(180deg, rgba(245,246,250,0.2) 0%, rgba(245,246,250,0.6) 55%, var(--ink) 100%),
+      linear-gradient(120deg, #f1f2f6 0%, #e4e7eb 100%);
   }
   .hero-bg::after{
     content:"";
@@ -105,7 +158,7 @@
     font-size:clamp(40px, 6vw, 76px);
     line-height:0.95;letter-spacing:.5px;
     margin-bottom:18px;
-    text-shadow:0 8px 40px rgba(0,0,0,0.5);
+    text-shadow:0 8px 40px rgba(0,0,0,0.3);
   }
   .hero-meta{display:flex;gap:14px;align-items:center;margin-bottom:18px;font-size:13px;color:var(--text-dim);flex-wrap:wrap;}
   .hero-meta span{display:flex;align-items:center;gap:6px;}
@@ -121,7 +174,9 @@
   .btn-primary{background:var(--accent);color:#fff;}
   .btn-primary:hover{filter:brightness(1.1);}
   .btn-ghost{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid var(--line);}
+  [data-theme="light"] .btn-ghost {background:rgba(0,0,0,0.04); color:var(--text);}
   .btn-ghost:hover{background:rgba(255,255,255,0.14);}
+  [data-theme="light"] .btn-ghost:hover{background:rgba(0,0,0,0.08);}
 
   /* ---------- ROWS ---------- */
   .rows{position:relative;z-index:2;margin-top:-60px;padding-bottom:60px;}
@@ -150,24 +205,26 @@
     position:relative;flex:0 0 auto;width:200px;height:280px;
     border-radius:10px;overflow:hidden;cursor:pointer;
     background:var(--panel);
+    border:1px solid var(--line);
     transition:transform .25s ease, box-shadow .25s ease, z-index 0s;
     transform-origin:center;
   }
   .card:hover{
     transform:scale(1.08) translateY(-6px);
-    box-shadow:0 20px 50px rgba(0,0,0,0.6);
+    box-shadow:0 20px 50px rgba(0,0,0,0.2);
     z-index:5;
   }
   .card-art{
     position:absolute;inset:0;
     display:flex;align-items:center;justify-content:center;
     font-family:'Anton-ish',sans-serif;font-size:15px;text-align:center;
-    padding:14px;color:rgba(255,255,255,0.85);
+    padding:14px;color:var(--text);
+    opacity: 0.85;
   }
   .card-overlay{
     position:absolute;left:0;right:0;bottom:0;
     padding:12px;
-    background:linear-gradient(0deg, rgba(0,0,0,0.92) 10%, transparent 100%);
+    background:linear-gradient(0deg, var(--panel) 30%, transparent 100%);
     opacity:0;transform:translateY(6px);
     transition:opacity .2s ease, transform .2s ease;
   }
@@ -176,7 +233,8 @@
   .card-tags{display:flex;gap:6px;align-items:center;font-size:10px;color:var(--text-dim);}
   .card-ep{
     position:absolute;top:10px;right:10px;
-    background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+    background:var(--panel-2);
+    border: 1px solid var(--line);
     font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;
   }
   .card-play{
@@ -232,6 +290,11 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input id="searchInput" type="text" placeholder="Search anime...">
     </div>
+    <div class="theme-toggle-wrapper">
+      <div class="theme-toggle-btn" id="themeToggle" title="Toggle Theme">
+        <div class="theme-toggle-ball"></div>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -249,7 +312,7 @@
     </div>
     <p class="hero-desc">When the eternal winter cracks a forgotten seal, a wandering swordswoman and a exiled spirit-tamer must decide whether to save a kingdom that already left them for dead.</p>
     <div class="hero-actions">
-      <button class="btn btn-primary" onclick="sendPrompt('Play Frostbound Requiem episode 1')">
+      <button class="btn btn-primary" onclick="console.log('Play Frostbound Requiem episode 1')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
         Play Now
       </button>
@@ -326,6 +389,18 @@
     nav.classList.toggle('scrolled', window.scrollY > 30);
   });
 
+  // ---- theme switcher ----
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('nexus-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('nexus-theme', newTheme);
+  });
+
   // ---- placeholder catalog ----
   const palette = ['#ff3b5c','#ffb84d','#5c8dff','#8a5cff','#2ecc9c','#ff7a5c'];
   const titles = [
@@ -344,8 +419,8 @@
     const eps = 8 + (idx % 5) * 4;
     const isDub = idx % 3 === 0;
     return `
-      <div class="card" onclick="sendPrompt('Show details for ${title}')">
-        <div class="card-art" style="background:linear-gradient(160deg, ${color}55, #10131688 60%, #0b0d10 100%);">${title}</div>
+      <div class="card">
+        <div class="card-art" style="background:linear-gradient(160deg, ${color}33, var(--panel-2) 70%, var(--panel) 100%);">${title}</div>
         <div class="card-ep">EP ${eps}</div>
         <div class="card-play">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
@@ -361,6 +436,7 @@
 
   function fillRow(id, offset){
     const el = document.getElementById(id);
+    if(!el) return;
     let html = '';
     for(let i=0;i<10;i++){
       const t = titles[(i+offset) % titles.length];
@@ -374,19 +450,12 @@
   fillRow('row-finished', 12);
   fillRow('row-because', 18);
 
-  // ---- genre chip filter (visual only, re-shuffles rows) ----
+  // ---- genre chip filter (visual only) ----
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
     });
-  });
-
-  // ---- search ----
-  document.getElementById('searchInput').addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' && e.target.value.trim()){
-      sendPrompt('Search anime: ' + e.target.value.trim());
-    }
   });
 </script>
 
